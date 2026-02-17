@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Village of the Crimson RPG</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&family=Roboto:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <style>
+        /* VARIÁVEIS DE TEMA */
+        :root {
+            --accent-color: #8b0000; 
+            --bg-color: #000000;
+            --bg-gradient: linear-gradient(180deg, #050000 0%, #000000 100%);
+            --card-bg: rgba(15, 5, 5, 0.95);
+            --card-border: rgba(139, 0, 0, 0.3);
+            --text-main: #e0e0e0;
+            --text-muted: #999;
+            --nav-bg: rgba(0, 0, 0, 0.95);
+            --font-title: 'Oswald', sans-serif;
+            --font-body: 'Roboto', sans-serif;
+            --font-nav: 'Oswald', sans-serif;
+        }
+
+        body.theme-original { --accent-color: #0f3460; --bg-gradient: radial-gradient(circle at 50% 0%, #051020 0%, #000000 80%); --card-border: rgba(15, 52, 96, 0.3); }
+        body.theme-light { --accent-color: #2c3e50; --bg-color: #f0f2f5; --bg-gradient: linear-gradient(180deg, #e0e0e0 0%, #ffffff 100%); --card-bg: rgba(255, 255, 255, 0.95); --card-border: rgba(0, 0, 0, 0.1); --text-main: #1a1a1a; --text-muted: #555555; --nav-bg: rgba(255, 255, 255, 0.95); }
+        body.theme-coquette { --accent-color: #d48c9d; --bg-color: #fff0f5; --bg-gradient: radial-gradient(circle at 50% 50%, #ffe4e1 0%, #fff0f5 100%); --card-bg: rgba(255, 240, 245, 0.95); --card-border: rgba(212, 140, 157, 0.5); --text-main: #5c3a41; --text-muted: #8b6b72; --nav-bg: rgba(255, 230, 235, 0.95); --font-title: 'Playfair Display', serif; --font-nav: 'Playfair Display', serif; }
+        
+        body {
+            font-family: var(--font-body);
+            background-color: var(--bg-color);
+            background-image: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding-bottom: 80px; 
+            transition: background 0.5s ease, color 0.5s ease;
+        }
+
+        .main-container { max-width: 1400px; margin: 0 auto; min-height: 100vh; position: relative; }
+        .font-title { font-family: var(--font-title); }
+        .font-elegant { font-family: 'Playfair Display', serif; }
+
+        .nav-bar {
+            background: var(--nav-bg);
+            border-bottom: 1px solid var(--card-border);
+            backdrop-filter: blur(20px);
+            position: sticky; top: 0; z-index: 50;
+            display: flex; justify-content: center;
+            gap: 1rem; padding: 15px 10px; 
+            overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch;
+            box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+        }
+        .nav-bar::-webkit-scrollbar { display: none; } 
+
+        .tab-btn {
+            background: transparent; border: none;
+            font-family: var(--font-nav); font-weight: bold; font-size: 0.85rem;
+            cursor: pointer; padding: 8px 20px;
+            color: var(--text-muted); transition: all 0.3s;
+            text-transform: uppercase; letter-spacing: 1px;
+            position: relative; border-radius: 50px;
+            border: 1px solid transparent; flex-shrink: 0;
+        }
+        .tab-btn:hover { color: var(--text-main); background: rgba(255,255,255,0.05); transform: translateY(-2px); }
+        .tab-btn.active { color: #fff; background: var(--accent-color); box-shadow: 0 0 20px var(--accent-color); }
+
+        .tab-content { display: none; animation: fadeIn 0.8s ease; padding-bottom: 40px; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* HERO SECTION - TÍTULO AJUSTADO */
+        .main-title { 
+            font-size: clamp(3.5rem, 10vw, 6rem); /* Reduzido no mobile de 4rem para 3.5rem */
+            line-height: 0.85; 
+            text-transform: uppercase; 
+            letter-spacing: -2px; 
+            color: var(--text-main); 
+            text-shadow: 0 0 40px rgba(0,0,0,0.8); 
+            font-weight: 700; 
+        }
+        .main-title-sub { 
+            font-size: clamp(1.5rem, 5vw, 3rem); /* Reduzido para encaixar melhor */
+            line-height: 0.9; 
+            text-transform: uppercase; 
+            letter-spacing: 4px; 
+            color: var(--accent-color); 
+            font-weight: 300; 
+            filter: drop-shadow(0 0 15px var(--accent-color)); 
+        }
+        
+        .hero-container { 
+            display: flex; 
+            align-items: flex-end; 
+            justify-content: center; 
+            height: 100%; 
+            width: 100%; 
+            max-width: 100%; 
+            margin: 0 auto; 
+            position: relative; 
+            gap: 0; 
+            z-index: 1;
+        }
+        
+        /* IMAGEM DO GRUPO (4 PESSOAS) */
+        .hero-image { 
+            height: 95vh; /* Ocupa quase toda altura */
+            width: auto;
+            max-width: none;
+            min-width: 100%;
+            object-fit: contain; 
+            object-position: bottom center; 
+            
+            filter: drop-shadow(0 0 50px rgba(0,0,0,0.8)); 
+            mask-image: linear-gradient(to bottom, black 85%, transparent 100%); 
+            -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 100%); 
+            
+            transform: translateY(20px);
+        }
+
+        /* AJUSTE MOBILE CRÍTICO */
+        @media (max-width: 768px) {
+            .hero-bg-container {
+                overflow: hidden; /* Impede scroll horizontal */
+                display: flex;
+                justify-content: center;
+            }
+            .hero-image {
+                height: 75vh; /* Altura um pouco menor no mobile para o título não cobrir o rosto */
+                width: auto;
+                min-width: 220%; /* Zoom agressivo para mostrar os personagens grandes */
+                
+                /* Centraliza a imagem com zoom */
+                position: absolute;
+                bottom: 0;
+                left: 50%;
+                transform: translateX(-50%); 
+                
+                object-fit: cover;
+                object-position: top center; /* Foca na parte de cima (rostos) */
+            }
+            .hero-text-content {
+                padding-top: 5vh; /* Sobe o texto */
+            }
+        }
+        
+        .sorcery-card {
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px);
+            padding: 2px; position: relative;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 20px; overflow: hidden;
+        }
+        .sorcery-card::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, var(--accent-color) 0%, transparent 70%); opacity: 0.1; transform: rotate(30deg); pointer-events: none; }
+        .sorcery-card-inner { background: rgba(5, 5, 5, 0.8); border-radius: 0; padding: 30px; height: 100%; position: relative; z-index: 1; backdrop-filter: blur(10px); clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px); }
+        body.theme-light .sorcery-card-inner, body.theme-coquette .sorcery-card-inner { background: rgba(255, 255, 255, 0.6); }
+        .sorcery-card:hover { transform: translateY(-5px); box-shadow: 0 10px 40px -10px var(--accent-color); border-color: var(--accent-color); }
+
+        .pdf-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; max-width: 450px; margin: 0 auto 30px auto; padding: 18px; border: 1px solid var(--accent-color); border-radius: 0; background: rgba(139, 0, 0, 0.1); color: var(--text-main); font-family: var(--font-title); text-transform: uppercase; letter-spacing: 2px; font-weight: bold; transition: 0.3s; cursor: pointer; position: relative; clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); }
+        .pdf-btn:hover { background: var(--accent-color); color: white; box-shadow: 0 0 30px var(--accent-color); }
+
+        .clan-list-item { display: flex; align-items: center; justify-content: space-between; background: linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.08) 100%); border-left: 3px solid var(--accent-color); padding: 18px 30px; margin-bottom: 12px; transition: 0.3s; border-radius: 0 10px 10px 0; }
+        .clan-list-item:hover { padding-left: 40px; background: linear-gradient(90deg, var(--accent-color), transparent); color: white; }
+
+        .grade-badge { font-family: var(--font-title); font-weight: bold; padding: 4px 10px; border-radius: 4px; font-size: 0.7rem; letter-spacing: 1px; text-transform: uppercase; }
+        .difficulty-hard { background: rgba(255, 0, 0, 0.15); color: #ff5555; border: 1px solid #ff5555; }
+        .difficulty-medium { background: rgba(255, 170, 51, 0.15); color: #ffcc66; border: 1px solid #ffcc66; }
+        .difficulty-easy { background: rgba(51, 255, 119, 0.15); color: #66ff99; border: 1px solid #66ff99; }
+
+        .rank-row { display: flex; align-items: center; padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); transition: 0.2s; }
+        .rank-row:hover { background: rgba(255,255,255,0.05); transform: scale(1.01); }
+        .rank-number { font-family: var(--font-title); font-size: 1.4rem; width: 50px; color: var(--text-muted); font-weight: bold; }
+        .rank-1 { color: #ffd700; font-size: 1.8rem; text-shadow: 0 0 15px #ffd700; }
+
+        .mission-timer-box { background: linear-gradient(90deg, var(--accent-color) 0%, rgba(0,0,0,0.8) 100%); border: 1px solid rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 50px; display: inline-flex; align-items: center; gap: 12px; color: white; box-shadow: 0 0 20px rgba(139, 0, 0, 0.3); }
+        .timer-digits { font-family: var(--font-title); font-size: 1.2rem; color: #fff; letter-spacing: 2px; }
+
+        .profile-input { width: 100%; padding: 15px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; color: var(--text-main); margin-bottom: 15px; font-family: 'Roboto', sans-serif; font-size: 16px; transition: 0.3s; }
+        .profile-input:focus { border-color: var(--accent-color); box-shadow: 0 0 15px var(--accent-color); background: rgba(0,0,0,0.5); }
+        
+        .profile-avatar-large { width: 140px; height: 140px; border-radius: 50%; object-fit: cover; border: 3px solid var(--accent-color); box-shadow: 0 0 40px var(--accent-color); background: #000; margin: 0 auto 20px auto; }
+        .file-upload-btn { background: rgba(255,255,255,0.05); border: 1px dashed var(--text-muted); color: var(--text-muted); padding: 12px; width: 100%; text-align: center; border-radius: 15px; cursor: pointer; margin-bottom: 8px; font-size: 0.85rem; display: block; transition: 0.3s; }
+        .file-upload-btn:hover { border-color: var(--accent-color); color: var(--accent-color); background: rgba(139, 0, 0, 0.1); }
+
+        .theme-selector { display: flex; gap: 15px; justify-content: center; margin-bottom: 25px; }
+        .theme-btn { width: 35px; height: 35px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.2); cursor: pointer; transition: transform 0.2s; }
+        .theme-btn:hover { transform: scale(1.2); }
+        .theme-btn.t-crimson { background: #8b0000; }
+        .theme-btn.t-original { background: #0f3460; }
+        .theme-btn.t-light { background: #f0f2f5; border-color: #ccc; }
+        .theme-btn.t-coquette { background: #ffb7c5; }
+
+        .swal2-popup { background: var(--nav-bg) !important; border: 1px solid var(--card-border) !important; border-radius: 20px !important; }
+        .swal2-title { font-family: var(--font-title) !important; letter-spacing: 1px; }
+        .swal2-confirm { background: var(--accent-color) !important; border-radius: 50px !important; }
+        
+        .rep-table-row { display: flex; justify-content: space-between; align-items: center; padding: 15px; margin-bottom: 5px; background: linear-gradient(90deg, rgba(255,255,255,0.02) 0%, transparent 100%); border-left: 2px solid transparent; }
+        .rep-table-row:hover { background: rgba(255,255,255,0.05); }
+        .rep-level-badge { font-family: var(--font-title); font-size: 0.8rem; padding: 2px 8px; border-radius: 4px; background: rgba(255,255,255,0.1); letter-spacing: 1px; }
+
+        .admin-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .admin-table th, .admin-table td { padding: 12px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .admin-table th { color: var(--accent-color); font-family: var(--font-title); font-size: 0.9rem; text-transform: uppercase; }
+        .admin-table td { font-size: 0.9rem; color: var(--text-muted); }
+        .admin-row:hover { background: rgba(255,255,255,0.03); }
+        .admin-btn-delete { color: #ff5555; cursor: pointer; transition: 0.3s; }
+        .admin-btn-delete:hover { color: #ff0000; transform: scale(1.1); }
+
+        .auth-card-btn { display: block; width: 100%; padding: 20px; margin-bottom: 15px; border-radius: 20px; text-align: center; border: 1px solid var(--card-border); background: rgba(255,255,255,0.03); transition: 0.3s; cursor: pointer; }
+        .auth-card-btn:hover { background: rgba(255,255,255,0.08); transform: translateY(-3px); border-color: var(--accent-color); }
+        .auth-card-icon { font-size: 2rem; color: var(--accent-color); margin-bottom: 10px; display: block; }
+        .auth-card-title { font-family: var(--font-title); font-size: 1.5rem; color: var(--text-main); text-transform: uppercase; letter-spacing: 1px; }
+    </style>
+</head>
+<body class="theme-crimson">
+
+    <nav class="nav-bar">
+        <button onclick="openTab('inicio')" class="tab-btn active" id="btn-inicio">Início</button>
+        <button onclick="openTab('lore')" class="tab-btn" id="btn-lore">Enredo</button>
+        <button onclick="openTab('familias')" class="tab-btn" id="btn-familias">Clãs</button>
+        <button onclick="openTab('missoes')" class="tab-btn" id="btn-missoes">Missões</button>
+        <button onclick="openTab('ranking')" class="tab-btn" id="btn-ranking">Ranking</button>
+        <button onclick="openTab('reputacao')" class="tab-btn" id="btn-reputacao">Regras</button>
+        <button onclick="openTab('perfil')" class="tab-btn font-bold border border-white/20" id="btn-perfil" style="color: var(--accent-color)">PERFIL</button>
+    </nav>
+
+    <main class="main-container">
+
+        <!-- ABA INÍCIO -->
+        <div id="tab-inicio" class="tab-content active">
+            <div class="relative w-full min-h-[90vh] flex flex-col justify-center overflow-hidden px-4">
+                
+                <!-- CONTAINER DA IMAGEM (ATRAS DO TEXTO) -->
+                <div class="hero-bg-container">
+                    <!-- IMAGEM DO GRUPO (ENQUADRAMENTO AJUSTADO PARA MOBILE) -->
+                    <img src="https://s13.gifyu.com/images/bvhNy.png" alt="Grupo RPG" class="hero-image">
+                </div>
+
+                <div class="container mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 items-center h-full relative z-10 pt-10 hero-text-content">
+                    <div class="flex flex-col justify-center items-center lg:items-start text-center lg:text-left order-2 lg:order-1 mb-20 lg:mb-0">
+                        <div class="mb-4 relative">
+                            <h1 class="font-title main-title">VILLAGE</h1>
+                            <h1 class="font-title main-title-sub lg:ml-2">OF THE CRIMSON</h1>
+                        </div>
+                        
+                        <div class="border-l-0 lg:border-l-4 border-white/30 pl-0 lg:pl-6 max-w-lg mb-8 bg-black/40 lg:bg-transparent rounded lg:rounded-none p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none">
+                            <p class="font-elegant text-2xl italic leading-tight" style="color: var(--text-main); text-shadow: 0 0 20px rgba(0,0,0,1);">
+                                "Entre o céu e a terra, eu sou o único honrado."
+                            </p>
+                        </div>
+                        
+                        <div class="w-full lg:w-auto">
+                            <button onclick="openTab('lore')" class="w-full lg:w-auto px-8 py-4 rounded-full border border-white/10 text-white font-bold tracking-[0.2em] uppercase transition hover:scale-105 shadow-[0_0_30px_var(--accent-color)]" style="background: var(--accent-color);">
+                                <i class="fas fa-book-open mr-3"></i> LER O ENREDO
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="hidden lg:block"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ABA LORE -->
+        <div id="tab-lore" class="tab-content px-4 py-8">
+            <div class="max-w-4xl mx-auto text-center pt-10">
+                <i class="fas fa-scroll text-6xl mb-6" style="color: var(--accent-color); filter: drop-shadow(0 0 10px var(--accent-color))"></i>
+                <h2 class="text-5xl font-title mb-8" style="color: var(--text-main)">A HISTÓRIA DA VILA</h2>
+                <div class="sorcery-card">
+                    <div class="sorcery-card-inner text-left p-10">
+                        <p class="mb-6 text-justify leading-loose text-lg" style="color: var(--text-muted)">[O pergaminho com a história antiga ainda não foi desenrolado...]</p>
+                        <p class="text-sm italic opacity-50 text-center">Em breve, os segredos do Village of the Crimson serão revelados.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ABA CLÃS -->
+        <div id="tab-familias" class="tab-content px-4 py-6">
+            <div class="max-w-4xl mx-auto mb-8 text-center pt-10">
+                <h2 class="text-5xl font-title mb-2" style="color: var(--text-main)">CLÃS & FAMÍLIAS</h2>
+                <p class="text-sm opacity-70 mb-10" style="color: var(--text-muted)">As doze grandes linhagens.</p>
+                <button onclick="window.open('#', '_blank')" class="pdf-btn"><i class="fas fa-file-pdf text-2xl"></i> ACESSAR LINK DAS FAMÍLIAS</button>
+            </div>
+            <div class="max-w-4xl mx-auto" id="clans-list"></div>
+        </div>
+
+        <!-- ABA MISSÕES -->
+        <div id="tab-missoes" class="tab-content px-4 py-6">
+            <div class="max-w-7xl mx-auto mb-8 flex flex-col md:flex-row justify-between items-end gap-6 pt-6">
+                <div>
+                    <h2 class="text-5xl font-title" style="color: var(--text-main)">MISSÕES</h2>
+                    <p class="text-sm text-gray-500 mt-2">Quadro de Requisições da Academia</p>
+                </div>
+                <div class="mission-timer-box"><span class="text-xs uppercase tracking-widest opacity-70">Renovação</span><span class="timer-digits" id="mission-countdown">--d --h</span><i class="fas fa-hourglass-half animate-pulse"></i></div>
+            </div>
+            <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="missions-grid">
+                <div class="text-center w-full py-20 col-span-full opacity-50"><i class="fas fa-circle-notch fa-spin text-4xl mb-4"></i><br>Carregando missões do corvo...</div>
+            </div>
+        </div>
+
+        <!-- ABA RANKING -->
+        <div id="tab-ranking" class="tab-content px-4 py-6">
+            <div class="max-w-4xl mx-auto mb-10 text-center pt-10">
+                <h2 class="text-5xl font-title" style="color: var(--text-main)">RANKING GLOBAL</h2>
+                <div class="h-1 w-32 mx-auto mt-4 rounded-full" style="background: var(--accent-color); box-shadow: 0 0 15px var(--accent-color)"></div>
+            </div>
+            <div class="max-w-4xl mx-auto sorcery-card">
+                <div class="sorcery-card-inner p-0 overflow-hidden">
+                    <div class="flex p-5 text-xs font-bold uppercase tracking-wider border-b border-white/5" style="background: rgba(255,255,255,0.03); color: var(--text-muted)">
+                        <div class="w-12 text-center">#</div>
+                        <div class="flex-grow pl-4">Feiticeiro</div>
+                        <div class="w-24 text-right">Pontos</div>
+                    </div>
+                    <div id="ranking-list-container"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ABA REPUTAÇÃO -->
+        <div id="tab-reputacao" class="tab-content px-4 py-6">
+            <div class="max-w-6xl mx-auto space-y-12 pt-10">
+                <div class="text-center relative">
+                    <h2 class="text-5xl font-title z-10 relative" style="color: var(--text-main)">SISTEMA DE PRESTÍGIO</h2>
+                    <p class="text-sm mt-3 opacity-60 font-mono tracking-widest" style="color: var(--text-muted)">// MANUAL DO ALUNO //</p>
+                    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-20 bg-accent-color opacity-20 blur-3xl rounded-full pointer-events-none" style="background: var(--accent-color)"></div>
+                    <button onclick="window.open('#', '_blank')" class="mt-6 px-6 py-2 border border-white/20 text-xs uppercase tracking-widest rounded-full hover:bg-white/10 transition flex items-center gap-2 mx-auto" style="color: var(--accent-color)"><i class="fas fa-file-download"></i> Baixar Manual (PDF)</button>
+                </div>
+
+                <!-- Regra de Ouro -->
+                <div class="sorcery-card">
+                    <div class="sorcery-card-inner">
+                        <div class="border border-yellow-500/30 rounded-xl p-6 bg-gradient-to-r from-yellow-900/10 to-transparent relative overflow-hidden">
+                            <div class="absolute top-0 left-0 w-1 h-full bg-yellow-500"></div>
+                            <h4 class="font-title text-lg text-yellow-500 mb-2 flex items-center gap-2"><i class="fas fa-exclamation-triangle"></i> LEI ABSOLUTA: PRESTÍGIO ≠ FORÇA</h4>
+                            <div class="flex flex-col md:flex-row items-center justify-around gap-6 mt-4">
+                                <div class="text-center"><i class="fas fa-handshake text-4xl text-blue-400 mb-2"></i><p class="text-xs uppercase tracking-widest text-blue-300">Prestígio (Lábia)</p></div>
+                                <div class="text-2xl text-gray-500 font-bold">VS</div>
+                                <div class="text-center"><i class="fas fa-fist-raised text-4xl text-red-500 mb-2"></i><p class="text-xs uppercase tracking-widest text-red-300">Poder (Combate)</p></div>
+                            </div>
+                            <p class="text-sm text-gray-300 text-center mt-4 leading-relaxed max-w-2xl mx-auto">Pontos de Prestígio são sua moeda social. <span class="text-white font-bold">Você NÃO pode usar Prestígio para vencer lutas. Você NÃO pode usar Força Bruta para ganhar debates políticos.</span> Uma coisa anula a outra.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. O Exame -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    <div class="lg:col-span-5 sorcery-card">
+                        <div class="sorcery-card-inner text-center">
+                            <h3 class="font-title text-2xl mb-2" style="color: var(--text-main)">2. O EXAME</h3>
+                            <div class="mb-6">
+                                <i class="fas fa-dice-d20 text-6xl mb-4 animate-bounce" style="color: var(--accent-color); filter: drop-shadow(0 0 15px var(--accent-color))"></i>
+                                <p class="text-sm mb-2" style="color: var(--text-muted)">Role <strong>1d20</strong> + Modificadores</p>
+                            </div>
+                            <div class="bg-white/5 p-4 rounded-xl border border-white/10 mx-auto max-w-xs">
+                                <span class="block text-xs text-gray-500 mb-1">DIFICULDADE (DT)</span>
+                                <span class="text-4xl font-bold text-white">15</span>
+                                <span class="block text-xs text-gray-500 mt-1">Para entrada honrosa</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-7 space-y-4">
+                        <div class="sorcery-card mb-0" style="border-left: 5px solid #ff3333;">
+                            <div class="p-5 bg-gradient-to-r from-red-900/20 to-transparent">
+                                <div class="flex justify-between items-center mb-2"><span class="text-red-500 font-bold font-title text-xl">O INDIGNO</span><span class="text-xs font-mono bg-black/50 px-3 py-1 rounded text-gray-300">1-14</span></div>
+                                <p class="text-sm text-gray-400">Classificação: <strong>Fracasso</strong>. Reputação: <strong class="text-red-400">-10 pts</strong>.</p>
+                            </div>
+                        </div>
+                        <div class="sorcery-card mb-0" style="border-left: 5px solid #888;">
+                            <div class="p-5 bg-gradient-to-r from-gray-800/20 to-transparent">
+                                <div class="flex justify-between items-center mb-2"><span class="text-gray-300 font-bold font-title text-xl">O COMUM</span><span class="text-xs font-mono bg-black/50 px-3 py-1 rounded text-gray-300">15-17</span></div>
+                                <p class="text-sm text-gray-400">Classificação: <strong>Sucesso Médio</strong>. Reputação: <strong class="text-white">0 pts</strong>.</p>
+                            </div>
+                        </div>
+                        <div class="sorcery-card mb-0" style="border-left: 5px solid #3b82f6;">
+                            <div class="p-5 bg-gradient-to-r from-blue-900/20 to-transparent">
+                                <div class="flex justify-between items-center mb-2"><span class="text-blue-400 font-bold font-title text-xl">A PROMESSA</span><span class="text-xs font-mono bg-black/50 px-3 py-1 rounded text-gray-300">18-19</span></div>
+                                <p class="text-sm text-gray-400">Classificação: <strong>Sucesso Alto</strong>. Reputação: <strong class="text-blue-300">+15 pts</strong>.</p>
+                            </div>
+                        </div>
+                        <div class="sorcery-card mb-0" style="border-left: 5px solid #eab308;">
+                            <div class="p-5 bg-gradient-to-r from-yellow-900/20 to-transparent">
+                                <div class="flex justify-between items-center mb-2"><span class="text-yellow-400 font-bold font-title text-xl">O PRODÍGIO</span><span class="text-xs font-mono bg-black/50 px-3 py-1 rounded text-gray-300">20+</span></div>
+                                <p class="text-sm text-gray-400">Classificação: <strong>Perfeição</strong>. Reputação: <strong class="text-yellow-300">+30 pts</strong>.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ABA ADMIN -->
+        <div id="tab-admin" class="tab-content px-4 py-6">
+            <div class="max-w-6xl mx-auto mt-10">
+                <div class="modern-card p-8 border-l-4 border-red-600">
+                    <h2 class="text-3xl font-title text-white mb-6">PAINEL DO MESTRE</h2>
+                    <div class="mb-8 p-4 bg-white/5 rounded-lg">
+                        <h4 class="font-bold text-gray-400 mb-2 uppercase text-xs">Ações Rápidas</h4>
+                        <div class="flex gap-4">
+                            <button onclick="clearMissionSlots()" class="px-4 py-2 bg-red-900/50 hover:bg-red-900 text-white rounded border border-red-500 text-xs font-bold uppercase transition"><i class="fas fa-broom mr-2"></i> Limpar Vagas</button>
+                        </div>
+                    </div>
+                    <h4 class="font-bold text-gray-400 mb-4 uppercase text-xs">Gerenciar Jogadores</h4>
+                    <div class="overflow-x-auto">
+                        <table class="admin-table">
+                            <thead><tr><th>Nome</th><th>Grupo</th><th>Prestígio</th><th>Ações</th></tr></thead>
+                            <tbody id="admin-user-list"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ABA PERFIL -->
+        <div id="tab-perfil" class="tab-content px-4 py-6">
+            <div class="max-w-md mx-auto">
+                <div class="sorcery-card">
+                    <div class="sorcery-card-inner p-0 overflow-hidden">
+                        
+                        <!-- TELA DE ESCOLHA (LOGIN/REGISTER) -->
+                        <div id="auth-choice" class="p-8">
+                            <h2 class="text-3xl font-title text-center mb-8" style="color: var(--text-main)">ACESSO ACADÊMICO</h2>
+                            <div onclick="showLogin()" class="auth-card-btn">
+                                <i class="fas fa-sign-in-alt auth-card-icon"></i>
+                                <span class="auth-card-title">JÁ TENHO CONTA</span>
+                                <p class="text-xs text-gray-500 mt-2">Acessar ficha existente</p>
+                            </div>
+                            <div onclick="showRegister()" class="auth-card-btn">
+                                <i class="fas fa-user-plus auth-card-icon"></i>
+                                <span class="auth-card-title">CRIAR FICHA NOVA</span>
+                                <p class="text-xs text-gray-500 mt-2">Registrar novo personagem</p>
+                            </div>
+                        </div>
+
+                        <!-- TELA LOGIN -->
+                        <div id="login-section" class="p-8 hidden">
+                            <h2 class="text-2xl font-title text-center mb-6" style="color: var(--text-main)">LOGIN</h2>
+                            <div class="space-y-4 mb-6">
+                                <div><label class="text-xs uppercase font-bold block mb-1 opacity-70">Nome do Personagem</label><input type="text" id="login-name" class="profile-input" placeholder="Ex: Yuji Itadori"></div>
+                                <div><label class="text-xs uppercase font-bold block mb-1 opacity-70">PIN (4 nº)</label><input type="password" id="login-pin" class="profile-input" placeholder="****" maxlength="4"></div>
+                            </div>
+                            <button onclick="loginUser()" class="w-full py-4 rounded-xl font-bold uppercase transition shadow-lg text-white tracking-widest hover:scale-[1.02]" style="background: var(--accent-color)">ENTRAR</button>
+                            <button onclick="showAuthChoice()" class="w-full mt-4 text-xs uppercase tracking-widest opacity-60 hover:opacity-100">Voltar</button>
+                        </div>
+
+                        <!-- TELA REGISTRO -->
+                        <div id="register-section" class="p-8 hidden">
+                            <h2 class="text-2xl font-title text-center mb-6" style="color: var(--text-main)">NOVA FICHA</h2>
+                            
+                            <div class="text-center mb-6 relative">
+                                <label for="avatar-upload" class="cursor-pointer block mx-auto w-24 h-24 rounded-full border-2 border-dashed flex items-center justify-center hover:border-white transition group" style="border-color: var(--text-muted)">
+                                    <img id="preview-avatar" class="w-full h-full rounded-full object-cover hidden">
+                                    <i id="upload-icon" class="fas fa-camera text-2xl group-hover:scale-110 transition" style="color: var(--text-muted)"></i>
+                                </label>
+                                <input type="file" id="avatar-upload" accept="image/*" class="hidden" onchange="handleImageUpload(this, 'reg-avatar')">
+                                <span class="text-xs mt-1 block" style="color: var(--text-muted)">Toque para foto (Opcional)</span>
+                            </div>
+                            <input type="hidden" id="reg-avatar">
+
+                            <div class="space-y-3">
+                                <div><label class="text-xs uppercase font-bold block mb-1 opacity-70">Nome Completo</label><input type="text" id="reg-name" class="profile-input" placeholder="Ex: Yuji Itadori"></div>
+                                <div><label class="text-xs uppercase font-bold block mb-1 opacity-70">Prestígio Inicial</label><input type="number" id="reg-prestige" class="profile-input" placeholder="Ex: 0"></div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div><label class="text-xs uppercase font-bold block mb-1 opacity-70">PIN (4 nº)</label><input type="password" id="reg-pin" class="profile-input" placeholder="****" maxlength="4"></div>
+                                    <div><label class="text-xs uppercase font-bold block mb-1 opacity-70">Grupo</label><input type="text" id="reg-group" class="profile-input" placeholder="G1"></div>
+                                </div>
+                            </div>
+                            <button onclick="registerUser()" class="w-full py-4 rounded-xl font-bold uppercase transition mt-6 shadow-lg text-white tracking-widest hover:scale-[1.02]" style="background: var(--accent-color)">CRIAR</button>
+                            <button onclick="showAuthChoice()" class="w-full mt-4 text-xs uppercase tracking-widest opacity-60 hover:opacity-100">Voltar</button>
+                        </div>
+
+                        <!-- DASHBOARD (LOGADO) -->
+                        <div id="user-dashboard" class="hidden text-center pb-8">
+                            <div class="profile-wrapper pt-10">
+                                <div class="relative group">
+                                    <img id="dash-avatar" src="" class="profile-avatar-large">
+                                    <button onclick="triggerUpload('avatar-edit-input')" class="edit-btn edit-avatar opacity-0 group-hover:opacity-100 transition"><i class="fas fa-pen"></i></button>
+                                    <input type="file" id="avatar-edit-input" class="hidden" accept="image/*" onchange="updateProfileImage(this, 'avatar')">
+                                </div>
+                                <div class="px-8 w-full mt-4">
+                                    <div class="theme-selector">
+                                        <div onclick="setTheme('theme-crimson')" class="theme-btn t-crimson"></div>
+                                        <div onclick="setTheme('theme-original')" class="theme-btn t-original"></div>
+                                        <div onclick="setTheme('theme-coquette')" class="theme-btn t-coquette"></div>
+                                        <div onclick="setTheme('theme-light')" class="theme-btn t-light"></div>
+                                    </div>
+                                    <div class="flex items-center justify-center gap-2 mb-1"><h2 id="dash-name" class="text-3xl font-title" style="color: var(--text-main)">Nome</h2><button onclick="editName()" class="text-sm opacity-50 hover:opacity-100" style="color: var(--text-main)"><i class="fas fa-edit"></i></button></div>
+                                    <div class="mb-6 flex items-center justify-center gap-2"><span id="dash-group" class="text-xs px-3 py-1 rounded-full border border-white/10" style="color: var(--text-muted); background: rgba(255,255,255,0.05)">Grupo ???</span><button onclick="editGroup()" class="text-xs hover:opacity-100 opacity-50" style="color: var(--accent-color)"><i class="fas fa-edit"></i></button></div>
+                                    <span id="dash-title" class="grade-badge px-4 py-2 text-sm shadow-lg" style="background: var(--accent-color); color: white">Título</span>
+                                    <div class="border border-white/10 rounded-2xl p-6 mt-8 mb-8 relative overflow-hidden" style="background: rgba(0,0,0,0.3)">
+                                        <div class="absolute top-0 left-0 w-full h-1" style="background: var(--accent-color)"></div>
+                                        <p class="text-xs uppercase tracking-[0.2em] mb-2 opacity-70" style="color: var(--text-muted)">Prestígio Atual</p>
+                                        <div id="dash-points" class="text-6xl font-title" style="color: var(--text-main); text-shadow: 0 0 20px var(--accent-color)">0</div>
+                                    </div>
+                                    <div class="border-t border-white/10 pt-6">
+                                        <h4 class="text-xs font-bold mb-4 uppercase tracking-wider" style="color: var(--text-main)">Atualizar Pontuação</h4>
+                                        <div class="flex gap-2 justify-center mb-2"><input type="number" id="new-prestige-val" class="profile-input mb-0 text-center" style="width: 100px; padding: 10px;" placeholder="+/-"><button onclick="updateUserPrestige()" class="text-white px-6 rounded-xl font-bold text-xs hover:scale-105 transition" style="background: var(--accent-color)">SALVAR</button></div>
+                                    </div>
+                                    <div class="flex justify-between mt-8 px-2"><button onclick="logout()" class="text-xs opacity-60 hover:opacity-100 transition" style="color: var(--text-muted)">Sair da Conta</button><button onclick="deleteCharacter()" class="text-xs text-red-500 hover:text-red-400 transition">Resetar Ficha</button></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="text-center py-8 border-t border-white/5 mt-10">
+        <p class="text-xs text-gray-600">VILLAGE OF THE CRIMSON RPG</p>
+        <button onclick="openAdminPanel()" class="text-[10px] text-gray-800 hover:text-red-900 mt-2 uppercase tracking-widest font-bold">Painel do Mestre</button>
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, doc, setDoc, getDoc, updateDoc, deleteDoc, query, orderBy, arrayUnion } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
+
+        // FIREBASE CONFIG (MANTIDA)
+        const firebaseConfig = {
+            apiKey: "AIzaSyCAWOjENTeKJewxPN-5lehfkjF5i4K1nb0",
+            authDomain: "rpg-jujutsu.firebaseapp.com",
+            projectId: "rpg-jujutsu",
+            storageBucket: "rpg-jujutsu.firebasestorage.app",
+            messagingSenderId: "253547797321",
+            appId: "1:253547797321:web:df4b009e09eab93dd59898"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        console.log("Village Online");
+
+        // LISTAS VISUAIS
+        const clansList = ["Clã Zenin", "Clã Gojo", "Clã Kamo", "Clã Inumaki", "Família Nanami", "Família Kugisaki", "Família Fushiguro", "Família Itadori", "Clã A", "Clã B", "Clã C", "Clã D"];
+        window.renderClansList = function() {
+            const container = document.getElementById('clans-list'); container.innerHTML = "";
+            clansList.forEach((clan, index) => {
+                container.innerHTML += `<div class="clan-list-item"><span class="font-bold text-lg" style="color: var(--text-main)">${clan}</span><span style="color: var(--text-muted); font-size: 0.9rem; font-family: monospace;">${(index + 1).toString().padStart(2, '0')}</span></div>`;
+            });
+        };
+
+        // LISTENERS
+        const rankingQuery = query(collection(db, "users"), orderBy("prestige", "desc"));
+        onSnapshot(rankingQuery, (snapshot) => {
+            const users = []; snapshot.forEach((doc) => users.push(doc.data()));
+            renderRankingHTML(users);
+            renderAdminUserList(users); // Atualiza painel admin se aberto
+        });
+
+        const missionsCollection = collection(db, "missions");
+        onSnapshot(missionsCollection, (snapshot) => {
+            let missions = []; snapshot.forEach(doc => missions.push({ id: doc.id, ...doc.data() }));
+            renderMissions(missions);
+        });
+
+        // USER LOGIC
+        let currentUser = JSON.parse(localStorage.getItem('jjk_user')) || null;
+        const savedTheme = localStorage.getItem('rpg_theme') || 'theme-crimson';
+        document.body.className = savedTheme;
+        checkLoginState();
+
+        // NAVEGAÇÃO DE AUTH
+        window.showLogin = function() { document.getElementById('auth-choice').classList.add('hidden'); document.getElementById('login-section').classList.remove('hidden'); }
+        window.showRegister = function() { document.getElementById('auth-choice').classList.add('hidden'); document.getElementById('register-section').classList.remove('hidden'); }
+        window.showAuthChoice = function() { document.getElementById('login-section').classList.add('hidden'); document.getElementById('register-section').classList.add('hidden'); document.getElementById('auth-choice').classList.remove('hidden'); }
+
+        // LOGIN
+        window.loginUser = async function() {
+            const name = document.getElementById('login-name').value.trim();
+            const pin = document.getElementById('login-pin').value.trim();
+            if (!name || !pin) { Swal.fire('Erro', 'Preencha tudo.', 'error'); return; }
+            const userId = name.toLowerCase().replace(/[^a-z0-9]/g, '_');
+            try {
+                const docSnap = await getDoc(doc(db, "users", userId));
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data.pin === pin) { loginSuccess(data); Swal.fire({title:'Sucesso', text:'Bem-vindo de volta!', icon:'success', timer:1500, showConfirmButton:false}); }
+                    else { Swal.fire('Erro', 'Senha incorreta.', 'error'); }
+                } else { Swal.fire('Erro', 'Personagem não encontrado.', 'error'); }
+            } catch(e) { handleError(e); }
+        }
+
+        // REGISTRO
+        window.registerUser = async function() {
+            const name = document.getElementById('reg-name').value.trim();
+            // Default Silhouette Image if empty
+            const avatar = document.getElementById('reg-avatar').value || 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png';
+            const prestige = parseInt(document.getElementById('reg-prestige').value) || 0;
+            const pin = document.getElementById('reg-pin').value.trim();
+            const group = document.getElementById('reg-group').value.trim();
+            if (!name || !pin) { Swal.fire('Erro', 'Nome e PIN obrigatórios.', 'error'); return; }
+            
+            const userId = name.toLowerCase().replace(/[^a-z0-9]/g, '_');
+            const docRef = doc(db, "users", userId);
+            try {
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) { Swal.fire('Erro', 'Este nome já está em uso. Tente outro (ex: Mariana B).', 'error'); }
+                else {
+                    const newUser = { id: userId, name, avatar, prestige, pin, group };
+                    await setDoc(docRef, newUser); loginSuccess(newUser); Swal.fire('Criado', 'Bem-vindo ao RPG!', 'success');
+                }
+            } catch (e) { handleError(e); }
+        };
+
+        window.updateProfileImage = function(input, type) {
+            const file = input.files[0];
+            if (file) {
+                if(file.size > 500 * 1024) { Swal.fire('Erro', 'Max 500KB.', 'error'); return; }
+                const reader = new FileReader();
+                reader.onload = async function(e) {
+                    const base64 = e.target.result; const updateObj = {}; updateObj[type] = base64; 
+                    try { await updateDoc(doc(db, "users", currentUser.id), updateObj); currentUser[type] = base64; loginSuccess(currentUser); Swal.fire('Sucesso', 'Imagem atualizada!', 'success'); } catch (err) { handleError(err); }
+                }; reader.readAsDataURL(file);
+            }
+        };
+
+        window.updateUserPrestige = async function() {
+            const val = parseInt(document.getElementById('new-prestige-val').value);
+            if (isNaN(val) || val === 0) return;
+            const newTotal = parseInt(currentUser.prestige) + val;
+            try { await updateDoc(doc(db, "users", currentUser.id), { prestige: newTotal }); currentUser.prestige = newTotal; loginSuccess(currentUser); document.getElementById('new-prestige-val').value = ''; Swal.fire({title:'Atualizado', text: `Total: ${newTotal}`, icon:'success', timer:1000, showConfirmButton:false}); } catch (err) { handleError(err); }
+        };
+
+        window.editName = async function() { if(!currentUser) return; const { value: newName } = await Swal.fire({ title: 'Novo Nome', input: 'text', inputValue: currentUser.name, background: '#111', color: '#fff', confirmButtonColor: '#8b0000' }); if (newName) { try { await updateDoc(doc(db, "users", currentUser.id), { name: newName }); currentUser.name = newName; loginSuccess(currentUser); } catch(e) { handleError(e); } } };
+        window.editGroup = async function() { if(!currentUser) return; const { value: newGroup } = await Swal.fire({ title: 'Novo Grupo', input: 'text', inputValue: currentUser.group, background: '#111', color: '#fff', confirmButtonColor: '#8b0000' }); if (newGroup) { try { await updateDoc(doc(db, "users", currentUser.id), { group: newGroup }); currentUser.group = newGroup; loginSuccess(currentUser); } catch(e) { handleError(e); } } };
+        window.deleteCharacter = async function() { const { isConfirmed } = await Swal.fire({ title: 'Tem certeza?', text: "Resetar personagem?", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33' }); if(isConfirmed) { try { await deleteDoc(doc(db, "users", currentUser.id)); logout(); } catch(e) { handleError(e); } } };
+
+        function loginSuccess(user) { currentUser = user; localStorage.setItem('jjk_user', JSON.stringify(user)); checkLoginState(); }
+        function checkLoginState() {
+            const authChoice = document.getElementById('auth-choice'); const loginSec = document.getElementById('login-section'); const regSec = document.getElementById('register-section'); const dash = document.getElementById('user-dashboard');
+            if (currentUser) {
+                authChoice.classList.add('hidden'); loginSec.classList.add('hidden'); regSec.classList.add('hidden'); dash.classList.remove('hidden');
+                document.getElementById('dash-name').innerText = currentUser.name; document.getElementById('dash-points').innerText = currentUser.prestige; document.getElementById('dash-avatar').src = currentUser.avatar; document.getElementById('dash-group').innerText = currentUser.group || "Sem Grupo";
+                let title = "Neutro"; if(currentUser.prestige >= 80) title = "Lenda"; else if(currentUser.prestige >= 50) title = "Influente"; else if(currentUser.prestige >= 20) title = "Respeitado"; else if(currentUser.prestige < 0) title = "Pária";
+                document.getElementById('dash-title').innerText = title;
+            } else { authChoice.classList.remove('hidden'); loginSec.classList.add('hidden'); regSec.classList.add('hidden'); dash.classList.add('hidden'); }
+        }
+        window.logout = function() { localStorage.removeItem('jjk_user'); currentUser = null; checkLoginState(); };
+        function handleError(e) { if (e.code === 'permission-denied') Swal.fire('Erro Permissão', 'Banco bloqueado. Mude as regras no Firebase Console.', 'error'); else Swal.fire('Erro', 'Tente novamente.', 'error'); }
+
+        window.renderRankingHTML = function(users) {
+            const container = document.getElementById('ranking-list-container'); container.innerHTML = "";
+            users.forEach((user, index) => {
+                let rankClass = "opacity-50"; if (index === 0) rankClass = "rank-1 text-yellow-400 opacity-100";
+                container.innerHTML += `<div class="rank-row ${index < 3 ? 'bg-white/5' : ''}"><div class="rank-number text-center ${rankClass}">${index + 1}</div><div class="flex-grow pl-2 flex items-center gap-3"><img src="${user.avatar}" class="w-8 h-8 rounded-full object-cover border border-white/20"><div class="flex flex-col"><span class="font-bold text-sm" style="color: var(--text-main)">${user.name}</span><span class="text-[10px]" style="color: var(--text-muted)">${user.group || '-'}</span></div></div><div class="w-20 text-right font-title text-lg" style="color: var(--text-main)">${user.prestige}</div></div>`;
+            });
+        }
+
+        window.renderMissions = function(missions) {
+            const grid = document.getElementById('missions-grid'); grid.innerHTML = ""; 
+            if(missions.length === 0) grid.innerHTML = "<p class='text-center w-full col-span-3 opacity-50'>Nenhuma missão ativa no momento.</p>";
+            missions.forEach(mission => {
+                let badgeClass = mission.difficulty === "hard" ? "difficulty-hard" : (mission.difficulty === "medium" ? "difficulty-medium" : "difficulty-easy");
+                let badgeText = mission.difficulty === "hard" ? "DIFÍCIL" : (mission.difficulty === "medium" ? "MÉDIO" : "FÁCIL");
+                const currentSlots = mission.participants ? mission.participants.length : 0;
+                const isFull = currentSlots >= mission.slotsMax;
+                const btnStyle = isFull ? "background: #333; color: #666; cursor: not-allowed;" : "background: var(--accent-color); color: white;";
+                const btnText = isFull ? "ESGOTADO" : "ACEITAR";
+                const onclickAttr = isFull ? "" : `onclick="acceptMission('${mission.id}')"`;
+                let participantsHTML = "";
+                if(mission.participants && mission.participants.length > 0) {
+                    participantsHTML = `<div class="participant-list">`;
+                    mission.participants.forEach(p => { participantsHTML += `<div class="participant-item"><div class="participant-dot" style="background:var(--accent-color)"></div> ${p.name.split(' ')[0]}</div>`; });
+                    participantsHTML += `</div>`;
+                }
+                const card = document.createElement('div'); card.className = "modern-card p-5 flex flex-col justify-between min-h-[220px]";
+                card.style.clipPath = "polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)";
+                if(mission.difficulty === "hard") card.style.borderTop = "4px solid #ff3333";
+                card.innerHTML = `<div><div class="flex justify-between items-start mb-3"><span class="grade-badge ${badgeClass}">${badgeText}</span><span class="text-[10px] font-bold ${isFull ? 'text-red-500' : 'text-green-400'}">${currentSlots}/${mission.slotsMax} VAGAS</span></div><h3 class="text-lg font-bold mb-2 leading-tight" style="color: var(--text-main)">${mission.title}</h3><p class="text-xs mb-3 line-clamp-3" style="color: var(--text-muted)">${mission.desc}</p></div><div><div class="flex items-center gap-2 text-xs mb-3" style="color: var(--text-muted)"><i class="fas fa-map-marker-alt"></i> <span>${mission.location}</span></div>${participantsHTML}<button ${onclickAttr} class="w-full py-2 rounded-sm text-xs font-bold uppercase transition border mt-2" style="${btnStyle}" ${isFull ? 'disabled' : ''}>${btnText}</button></div>`;
+                grid.appendChild(card);
+            });
+        };
+
+        window.acceptMission = async function(missionId) {
+            if (!currentUser) { Swal.fire('Atenção', 'Crie sua ficha primeiro.', 'warning'); return; }
+            const missionRef = doc(db, "missions", missionId);
+            const snap = await getDoc(missionRef); const m = snap.data();
+            if(m.participants && m.participants.some(p => p.name === currentUser.name)) { Swal.fire('Ops', 'Você já está nessa missão.', 'info'); return; }
+            if(m.participants && m.participants.length >= m.slotsMax) { Swal.fire('Cheio', 'Missão lotada.', 'error'); return; }
+            try { await updateDoc(missionRef, { participants: arrayUnion({ name: currentUser.name, group: currentUser.group }) }); Swal.fire('Sucesso', 'Vaga confirmada!', 'success'); } catch(e) { handleError(e); }
+        };
+
+        // --- LÓGICA DO ADMIN ---
+        window.openAdminPanel = async function() {
+            const { value: password } = await Swal.fire({
+                title: 'Acesso Mestre', input: 'password', inputLabel: 'Senha Administrativa',
+                background: '#111', color: '#fff', confirmButtonColor: '#8b0000', showCancelButton: true
+            });
+
+            if (password === 'admin123') { // SENHA PADRÃO AQUI
+                openTab('admin');
+                Swal.fire({title:'Acesso Permitido', icon:'success', timer:1000, showConfirmButton:false});
+            } else if (password) {
+                Swal.fire({title:'Negado', text:'Senha incorreta.', icon:'error'});
+            }
+        };
+
+        window.renderAdminUserList = function(users) {
+            const container = document.getElementById('admin-user-list');
+            if(!container) return; // Se aba não carregada
+            container.innerHTML = "";
+            users.forEach(user => {
+                const tr = document.createElement('tr');
+                tr.className = 'admin-row';
+                tr.innerHTML = `
+                    <td>${user.name}</td>
+                    <td>${user.group || '-'}</td>
+                    <td>${user.prestige}</td>
+                    <td><i onclick="adminDeleteUser('${user.id}')" class="fas fa-trash admin-btn-delete" title="Apagar Ficha"></i></td>
+                `;
+                container.appendChild(tr);
+            });
+        };
+
+        window.adminDeleteUser = async function(userId) {
+            const { isConfirmed } = await Swal.fire({
+                title: 'Apagar Definitivamente?', text: "Essa ação não pode ser desfeita.",
+                icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'Sim, apagar'
+            });
+            if (isConfirmed) {
+                try { await deleteDoc(doc(db, "users", userId)); Swal.fire('Apagado!', 'A ficha foi removida.', 'success'); } 
+                catch(e) { handleError(e); }
+            }
+        };
+
+        window.clearMissionSlots = async function() {
+            Swal.fire('Função de Reset', 'Para limpar todas as missões, edite os documentos "missions" no Firebase Console setando "participants" para [].', 'info');
+        };
+
+        renderClansList();
+    </script>
+
+    <script>
+        window.openTab = function(tabName) {
+            var contents = document.getElementsByClassName("tab-content");
+            for (var i = 0; i < contents.length; i++) { contents[i].classList.remove("active"); }
+            var btns = document.getElementsByClassName("tab-btn");
+            for (var i = 0; i < btns.length; i++) { btns[i].classList.remove("active"); }
+            document.getElementById("tab-" + tabName).classList.add("active");
+            
+            // Ativa botão nav
+            const btnId = "btn-" + tabName;
+            const btn = document.getElementById(btnId);
+            if(btn) btn.classList.add("active");
+        }
+        window.setTheme = function(themeName) { document.body.className = themeName; localStorage.setItem('rpg_theme', themeName); }
+        window.handleImageUpload = function(input, targetId) {
+            const file = input.files[0];
+            if (file) {
+                if (file.size > 500 * 1024) { Swal.fire('Muito grande!', 'Max 500KB.', 'error'); return; }
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById(targetId).value = e.target.result;
+                    if(targetId === 'reg-avatar') { document.getElementById('preview-avatar').src = e.target.result; document.getElementById('preview-avatar').classList.remove('hidden'); document.getElementById('upload-icon').classList.add('hidden'); }
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+        window.triggerUpload = function(inputId) { document.getElementById(inputId).click(); }
+        function startTimer() { 
+            let timeInSeconds = 5 * 24 * 60 * 60; const display = document.getElementById('mission-countdown');
+            setInterval(() => { timeInSeconds--; if(display) display.innerText = `05d 12h 00m`; }, 1000);
+        }
+        window.onload = function() { startTimer(); };
+    </script>
+</body>
+</html>
