@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kurenai no Sato - RPG</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Oswald:wght@400;700;800&family=Playfair+Display:ital,wght@1,500&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <style>
+        :root {
+            --bg-body: #020617;         
+            --bg-card: #0f172a;         
+            --bg-card-hover: #1e293b;   
+            --text-main: #f8fafc;       
+            --text-muted: #94a3b8;      
+            --accent-color: #2563eb;    
+            --gold-color: #38bdf8;      
+            --crimson-accent: #b91c1c;
+            --radius-xl: 24px;
+            --radius-lg: 16px;
+            --font-main: 'Plus Jakarta Sans', sans-serif;
+            --font-title: 'Oswald', sans-serif;
+        }
+
+        body { font-family: var(--font-main); background-color: var(--bg-body); color: var(--text-main); margin: 0; padding: 0; height: 100vh; overflow: hidden; display: flex; }
+
+        /* --- SCROLLBARS --- */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-body); }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: 90px; background: var(--bg-card); height: 95vh; margin: 2.5vh 0 2.5vh 20px; border-radius: var(--radius-xl);
+            display: flex; flex-direction: column; align-items: center; padding: 30px 0; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 100; flex-shrink: 0;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .logo-icon {
+            width: 50px; height: 50px; background: var(--crimson-accent); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 1.2rem; margin-bottom: 40px;
+            box-shadow: 0 5px 15px rgba(185, 28, 28, 0.4);
+        }
+        .nav-btn {
+            width: 50px; height: 50px; border-radius: 16px; display: flex; align-items: center; justify-content: center;
+            color: var(--text-muted); font-size: 1.2rem; margin-bottom: 12px; transition: all 0.3s; cursor: pointer;
+        }
+        .nav-btn:hover { background: rgba(255, 255, 255, 0.05); color: var(--text-main); }
+        .nav-btn.active { background: var(--accent-color); color: #fff; box-shadow: 0 0 20px rgba(37, 99, 235, 0.4); }
+
+        /* --- MAIN AREA --- */
+        .main-wrapper { flex: 1; height: 100vh; overflow-y: auto; padding: 30px 40px; position: relative; scroll-behavior: smooth; }
+
+        .top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .search-bar { 
+            background: var(--bg-card); padding: 12px 20px; border-radius: var(--radius-lg); width: 400px; max-width: 100%; display: flex; align-items: center; gap: 10px; 
+            border: 1px solid rgba(255, 255, 255, 0.05); transition: 0.3s; 
+        }
+        .search-bar input { border: none; outline: none; width: 100%; color: var(--text-main); background: transparent; }
+        
+        .user-pill { 
+            display: flex; align-items: center; gap: 15px; background: var(--bg-card); padding: 8px 8px 8px 20px; 
+            border-radius: 50px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); cursor: pointer; border: 1px solid rgba(255, 255, 255, 0.05); 
+        }
+        .avatar-circle { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #1e293b; border: 2px solid #334155; }
+
+        .tab-pane { display: none; animation: fadeIn 0.3s ease-out; }
+        .tab-pane.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- HOME BANNER --- */
+        .home-anime-banner {
+            background-color: #050b14; border-radius: 40px; position: relative; overflow: hidden; min-height: 80vh;
+            width: 100%; display: flex; align-items: center; padding: 60px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); border: 1px solid rgba(37, 99, 235, 0.2);
+        }
+        .hab-bg-text { position: absolute; top: 15%; left: 5%; transform: translateY(-50%); font-family: var(--font-title); font-size: 15vw; font-weight: 800; color: transparent; -webkit-text-stroke: 2px rgba(255,255,255,0.03); z-index: 1; white-space: nowrap; pointer-events: none; }
+        .hab-character { position: absolute; right: -5%; bottom: 0; height: 95%; max-height: 850px; z-index: 5; object-fit: contain; pointer-events: none; filter: drop-shadow(-20px 20px 30px rgba(0,0,0,0.8)); }
+        .hab-content { position: relative; z-index: 10; max-width: 600px; }
+        .hab-title { font-family: var(--font-title); font-size: clamp(3rem, 6vw, 5.5rem); font-weight: 800; line-height: 0.9; color: #fff; text-transform: uppercase; }
+        .hab-stats { display: flex; gap: 50px; margin-top: 45px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 30px; }
+        .hab-stat-item h4 { font-family: var(--font-title); font-size: 2rem; font-weight: 800; color: #fff; }
+        .hab-stat-item p { font-size: 0.85rem; color: #94a3b8; font-weight: 800; text-transform: uppercase; }
+        .hab-action-btn { border: 2px solid rgba(255,255,255,0.2); color: #fff; padding: 12px 28px; border-radius: 50px; font-weight: 700; font-size: 0.85rem; transition: 0.3s; cursor: pointer; text-transform: uppercase; margin-top: 50px; margin-right: 15px; }
+        .hab-action-btn:hover { background: #fff; color: #000; }
+
+        /* --- LOJA E PRODUTOS --- */
+        .shop-filter-bar { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 20px; }
+        .shop-filter-btn { padding: 10px 20px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.1); background: var(--bg-card); color: var(--text-muted); font-size: 0.8rem; cursor: pointer; transition: 0.3s; font-weight: 600; white-space: nowrap; }
+        .shop-filter-btn:hover, .shop-filter-btn.active { background: #ffffff; color: #000; border-color: #fff; }
+        .shop-item { background: var(--bg-card); border-radius: 20px; padding: 25px; border: 1px solid rgba(255, 255, 255, 0.05); transition: 0.3s; display: flex; flex-direction: column; justify-content: space-between; height: 100%; cursor: pointer; }
+        .shop-item h4 { color: #ffffff !important; font-size: 1.1rem; font-weight: 700; }
+        .shop-item:hover { border-color: #38bdf8; transform: translateY(-5px); background: var(--bg-card-hover); }
+
+        /* --- MISSÕES --- */
+        .mission-card { background: var(--bg-card); padding: 25px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.05); border-left: 6px solid #ccc; transition: 0.3s; position: relative; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; }
+        .mission-card:hover { background: #151f38; border-color: #38bdf8; transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.4); }
+        .mission-rank-badge { width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #fff; font-size: 1.5rem; flex-shrink: 0; font-family: var(--font-title); }
+        .mission-filter-btn { padding: 8px 20px; border-radius: 50px; border: 1px solid #334155; color: #94a3b8; font-size: 0.8rem; font-weight: bold; cursor: pointer; transition: 0.3s; white-space: nowrap;}
+        .mission-filter-btn:hover { background: #1e293b; color: #fff; }
+        .mission-filter-btn.active { background: #ffffff; color: #000; border-color: #fff; }
+
+        /* --- CLAS --- */
+        .clan-card { background: var(--bg-card); padding: 20px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; border: 1px solid rgba(255, 255, 255, 0.05); transition: 0.3s; }
+        .clan-card:hover { transform: translateY(-3px); border-color: var(--accent-color); }
+
+        /* --- RANKING --- */
+        .rank-card-large { background: #0a1128; border-radius: 30px; padding: 40px; border: 1px solid rgba(255,255,255,0.1); text-align: center; max-width: 400px; margin: 0 auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: flex; flex-direction: column; align-items: center; transition: 0.3s;}
+        .rank-card-large:hover { transform: translateY(-5px); border-color: #38bdf8; }
+        .rank-number-top { font-size: 1.5rem; font-weight: 800; color: #fff; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; width: 45px; height: 45px; border-radius: 50%; }
+
+        /* --- REPUTAÇÃO E PERFIL --- */
+        .rep-section { background: var(--bg-card); padding: 25px; border-radius: 20px; margin-bottom: 15px; box-shadow: var(--shadow-soft); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .input-dark { background: #020617; border: 1px solid #334155; color: #fff; border-radius: 12px; padding: 18px; width: 100%; transition: 0.3s; outline: none; font-size: 0.95rem; }
+        .input-dark:focus { border-color: var(--accent-color); box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.3); }
+
+        /* --- ADMIN TABLES --- */
+        .admin-table { width: 100%; border-collapse: collapse; }
+        .admin-table th { padding: 12px; border-bottom: 1px solid #334155; color: #94a3b8; font-size: 0.75rem; text-transform: uppercase; text-align: left; }
+        .admin-table td { padding: 12px; border-bottom: 1px solid #1e293b; font-size: 0.9rem; }
+
+        /* SWAL OVERRIDES */
+        .swal2-popup { border-radius: 24px !important; font-family: var(--font-main) !important; background: #0f172a !important; color: #fff !important; border: 1px solid rgba(255,255,255,0.1) !important; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.8) !important;}
+        .swal2-title { font-size: 1.5rem !important; color: #fff !important; font-weight: 800 !important; }
+        .swal2-input { background: #020617 !important; color: #fff !important; border-color: #334155 !important; border-radius: 12px !important;}
+        .swal2-confirm { background: #2563eb !important; color: #fff !important; border-radius: 12px !important; font-weight: 800 !important; padding: 12px 24px !important; }
+        .swal2-cancel { background: transparent !important; border: 1px solid #475569 !important; color: #cbd5e1 !important; border-radius: 12px !important; font-weight: bold !important; padding: 12px 24px !important;}
+
+        @media (max-width: 1024px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; flex-direction: row; justify-content: space-around; position: fixed; bottom: 0; margin: 0; border-radius: 0; z-index: 999; }
+            .main-wrapper { padding: 20px; margin-bottom: 80px; }
+            .logo-icon { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="logo-icon">KS</div>
+        <div class="nav-btn active" onclick="switchTab('home', this)" title="Início"><i class="fas fa-home"></i></div>
+        <div class="nav-btn" onclick="switchTab('shop', this)" title="Arsenal"><i class="fas fa-shopping-bag"></i></div>
+        <div class="nav-btn" onclick="switchTab('missions', this)" title="Missões"><i class="fas fa-scroll"></i></div>
+        <div class="nav-btn" onclick="switchTab('clans', this)" title="Clãs"><i class="fas fa-users"></i></div>
+        <div class="nav-btn" onclick="switchTab('ranking', this)" title="Ranking"><i class="fas fa-trophy"></i></div>
+        <div class="nav-btn" onclick="switchTab('reputacao', this)" title="Regras"><i class="fas fa-book"></i></div>
+        <div class="nav-btn" onclick="switchTab('profile', this)" title="Perfil" style="color: #38bdf8;"><i class="fas fa-user-circle"></i></div>
+        <div class="nav-btn" style="margin-top: auto; color: #ef4444;" onclick="openAdminPanel()" title="Admin"><i class="fas fa-cog"></i></div>
+    </aside>
+
+    <div class="main-wrapper">
+        <div class="top-header">
+            <div class="search-bar">
+                <i class="fas fa-search text-gray-400"></i>
+                <input type="text" id="global-search" placeholder="Pesquisar loja, missão ou clã..." onkeyup="handleSearch(this.value)">
+            </div>
+            <div class="user-pill" onclick="switchTab('profile')">
+                <div class="text-right mr-3 hidden md:block leading-none">
+                    <p class="text-[9px] text-gray-500 uppercase font-bold mb-1">Status: On</p>
+                    <p class="font-bold text-sm text-white" id="header-username">Visitante</p>
+                </div>
+                <img id="header-avatar" src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png" class="avatar-circle">
+            </div>
+        </div>
+
+        <div id="content-area">
+            <!-- ABA HOME -->
+            <div id="tab-home" class="tab-pane active">
+                <div class="home-anime-banner">
+                    <div class="hab-bg-text">KURENAI</div>
+                    <img src="https://i.ibb.co/LhQZTchf/e68ad3ee-b169-481f-8353-7513782c7373.png" class="hab-character" alt="Hero">
+                    <div class="hab-content">
+                        <h1 class="hab-title">KURENAI NO SATO</h1>
+                        <h2 class="hab-subtitle">紅の里</h2>
+                        <p class="hab-desc">Centro da Academia Jujutsu. Construa sua reputação, adquira armas no arsenal e sobreviva aos contratos da vila.</p>
+                        <div class="hab-stats">
+                            <div class="hab-stat-item"><p>Saldo</p><h4 id="home-stat-saldo">0 L</h4></div>
+                            <div class="hab-stat-item"><p>Prestígio</p><h4 id="home-stat-prestigio">0 Pts</h4></div>
+                            <div class="hab-stat-item"><p>Status</p><h4 id="home-stat-status" class="uppercase text-cyan-400">Neutro</h4></div>
+                        </div>
+                        <button class="hab-action-btn" onclick="switchTab('missions')">Quadro de Missões</button>
+                        <button class="hab-action-btn" onclick="switchTab('shop')">Ver Arsenal</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ABA LOJA -->
+            <div id="tab-shop" class="tab-pane">
+                <div class="mb-6 text-white text-center md:text-left">
+                    <h2 class="text-3xl md:text-4xl font-extrabold mb-1 uppercase tracking-tighter">Arsenal e Suprimentos</h2>
+                    <p class="text-gray-400 text-sm">Adquira equipamentos para sua jornada na Academia.</p>
+                </div>
+                <div class="shop-filter-bar mb-6 scrollbar-hide" id="shop-filter-bar">
+                    <button onclick="filterShop('all', this)" class="shop-filter-btn active">Todos</button>
+                    <button onclick="filterShop('Ferramenta', this)" class="shop-filter-btn">Ferramentas</button>
+                    <button onclick="filterShop('Arma', this)" class="shop-filter-btn">Armas</button>
+                    <button onclick="filterShop('Shinobi', this)" class="shop-filter-btn">Shinobi</button>
+                    <button onclick="filterShop('Sobrevivência', this)" class="shop-filter-btn">Sobrevivência</button>
+                    <button onclick="filterShop('Elite', this)" class="shop-filter-btn">Elite</button>
+                    <button onclick="filterShop('Especial', this)" class="shop-filter-btn">Especiais</button>
+                </div>
+                <div class="shop-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="shop-grid-container"></div>
+            </div>
+
+            <!-- ABA MISSÕES -->
+            <div id="tab-missions" class="tab-pane">
+                <div class="mb-6 text-white text-center md:text-left">
+                    <h2 class="text-3xl md:text-4xl font-extrabold mb-1 uppercase font-title tracking-tighter">Quadro de Missões</h2>
+                    <p class="text-gray-400 text-sm">Aceite contratos da Academia e prove seu valor. (2 Vagas por contrato)</p>
+                </div>
+                
+                <div class="flex gap-2 overflow-x-auto pb-2 mb-8 scrollbar-hide" id="mission-filter-bar">
+                    <button onclick="filterMissions('all', this)" class="mission-filter-btn active">Todos os Ranks</button>
+                    <button onclick="filterMissions('D', this)" class="mission-filter-btn">Rank D</button>
+                    <button onclick="filterMissions('C', this)" class="mission-filter-btn">Rank C</button>
+                    <button onclick="filterMissions('B', this)" class="mission-filter-btn">Rank B</button>
+                    <button onclick="filterMissions('A', this)" class="mission-filter-btn">Rank A</button>
+                    <button onclick="filterMissions('S', this)" class="mission-filter-btn">Rank S</button>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="missions-grid-container"></div>
+            </div>
+
+            <!-- ABA CLÃS -->
+            <div id="tab-clans" class="tab-pane">
+                <div class="mb-8 text-white text-center md:text-left"><h2 class="text-3xl md:text-4xl font-extrabold uppercase tracking-tighter">Clãs e Famílias</h2><p class="text-gray-400 text-sm">Organizações das 5 grandes vilas.</p></div>
+                <div id="clans-grid-container" class="space-y-8"></div>
+            </div>
+
+            <!-- ABA RANKING -->
+            <div id="tab-ranking" class="tab-pane">
+                <div class="mb-10 text-center text-white"><h2 class="text-4xl md:text-5xl font-extrabold uppercase font-title tracking-tighter">Mural de Honra</h2><p class="text-gray-400">Os estudantes de maior prestígio e reconhecimento.</p></div>
+                <div class="ranking-container grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="ranking-list-container"></div>
+            </div>
+
+            <!-- ABA REGRAS -->
+            <div id="tab-reputacao" class="tab-pane">
+                <div class="max-w-4xl mx-auto pb-10">
+                    <h2 class="text-3xl md:text-4xl font-extrabold mb-8 text-center text-white uppercase tracking-tighter">Sistema de Reputação</h2>
+                    <div class="rep-section border-l-4 border-l-gray-600">
+                        <h3 class="font-bold text-xl mb-3 text-white">1. O Exame (d20)</h3>
+                        <p class="text-gray-400 text-sm mb-4">Seu valor inicial na Academia é definido pelo primeiro combate (Dificuldade de Teste 15):</p>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex gap-2"><span class="text-red-500 font-bold">1-14:</span> -10 pontos (Indigno)</li>
+                            <li class="flex gap-2"><span class="text-gray-400 font-bold">15-17:</span> 0 pontos (Comum)</li>
+                            <li class="flex gap-2"><span class="text-blue-400 font-bold">18-19:</span> +15 pontos (Promessa)</li>
+                            <li class="flex gap-2"><span class="text-yellow-500 font-bold">20+:</span> +30 pontos (Prodígio)</li>
+                        </ul>
+                    </div>
+                    <div class="rep-section border-l-4 border-l-blue-600">
+                        <h3 class="font-bold text-xl mb-3 text-white">2. Categorias de Prestígio</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                            <div class="p-4 bg-red-900/20 rounded-xl border border-red-900/40"><strong>Pária (-50 a -20):</strong> Alvo de bullying, NPCs negam treinamento.</div>
+                            <div class="p-4 bg-gray-900 rounded-xl border border-gray-700"><strong>Neutro (0 a 19):</strong> O estudante comum, sem grande destaque.</div>
+                            <div class="p-4 bg-blue-900/20 rounded-xl border border-blue-900/40"><strong>Influente (50 a 79):</strong> Acesso a áreas restritas da biblioteca/arsenal.</div>
+                            <div class="p-4 bg-yellow-900/20 rounded-xl border border-yellow-900/40 font-bold"><strong>Lenda da Academia (80+):</strong> Aura opressora, intimida inimigos de nível baixo.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ABA PERFIL -->
+            <div id="tab-profile" class="tab-pane">
+                <div id="profile-content-container"></div>
+            </div>
+
+            <!-- ABA ADMIN -->
+            <div id="tab-admin" class="tab-pane">
+                <div class="max-w-6xl mx-auto">
+                    <h2 class="text-2xl font-bold mb-6 text-red-500 uppercase tracking-widest text-center md:text-left"><i class="fas fa-shield-alt mr-2"></i>Área do Mestre</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                        <div class="bg-[#0f172a] p-6 rounded-2xl border border-blue-900/40">
+                            <p class="text-sm text-gray-400 mb-4 font-bold">Gerar Contratos (Missões Oficiais)</p>
+                            <button onclick="seedMissions()" class="bg-blue-600 text-white py-3 rounded-xl font-bold w-full uppercase text-xs">Carregar 50 Missões no Quadro</button>
+                        </div>
+                        <div class="bg-[#0f172a] p-6 rounded-2xl border border-red-900/40 flex flex-col justify-center">
+                            <p class="text-sm text-gray-400 mb-4 font-bold">Zerar Contratos Semanais</p>
+                            <button onclick="clearMissionsData()" class="bg-red-600 text-white py-3 rounded-xl font-bold w-full uppercase text-xs">Limpar Participantes das Missões</button>
+                        </div>
+                    </div>
+                    <div class="admin-table-container mb-8 overflow-hidden">
+                        <h3 class="font-bold text-white mb-4"><i class="fas fa-history mr-2 text-yellow-500"></i>Logs do Sistema</h3>
+                        <div class="overflow-y-auto max-h-60 pr-2 scrollbar-hide">
+                            <table class="admin-table" id="admin-logs-list"></table>
+                        </div>
+                    </div>
+                    <div class="admin-table-container overflow-hidden">
+                        <h3 class="font-bold text-white mb-4"><i class="fas fa-users mr-2 text-blue-500"></i>Gerenciar Jogadores</h3>
+                        <div class="overflow-x-auto scrollbar-hide">
+                            <table class="admin-table w-full" id="admin-user-list"></table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT PRINCIPAL & FIREBASE -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, doc, setDoc, getDoc, updateDoc, deleteDoc, query, orderBy, arrayUnion, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
+
+        // =======================================================================
+        // 1. DADOS ESTÁTICOS GLOBAIS (ASSETS, ITENS, MISSÕES DO PDF)
+        // =======================================================================
+        
+        window.firebaseConfig = {
+            apiKey: "AIzaSyCAWOjENTeKJewxPN-5lehfkjF5i4K1nb0",
+            authDomain: "rpg-jujutsu.firebaseapp.com",
+            projectId: "rpg-jujutsu",
+            storageBucket: "rpg-jujutsu.firebasestorage.app",
+            messagingSenderId: "253547797321",
+            appId: "1:253547797321:web:df4b009e09eab93dd59898"
+        };
+
+        const appFirebase = initializeApp(window.firebaseConfig);
+        const db = getFirestore(appFirebase);
+
+        window.currentUser = JSON.parse(localStorage.getItem('jjk_user')) || null;
+        window.globalMissions = [];
+        window.globalUsers = [];
+        window.globalLogs = [];
+        window.currentTab = 'home';
+
+        window.villagesData = [
+            { name: "Vila 1: Centro", desc: "Sede da escola Jujutsu. Apenas a elite reside aqui.", clans: [{ name: "Clã Gojo", vagas: "X" }, { name: "Clã Zenin", vagas: 3 }, { name: "Clã Kamo", vagas: 2 }, { name: "Clã Uzumaki", vagas: 3 }] },
+            { name: "Vila 2: Relâmpago", desc: "Região Sudeste. Terra do Trovão.", clans: [{ name: "Clã Uchiha", vagas: 3 }, { name: "Clã Yamanaka", vagas: 4 }, { name: "Clã Zoldyck", vagas: 5 }, { name: "Clã Hakari", vagas: 5 }] },
+            { name: "Vila 3: Areia", desc: "Região Nordeste. Terras Desérticas.", clans: [{ name: "Clã Nara", vagas: 4 }, { name: "Clã Fushiguro", vagas: 2 }, { name: "Clã Hatake", vagas: 4 }, { name: "Clã Noctheris", vagas: 5 }] },
+            { name: "Vila 4: Folha", desc: "Região Norte. Terras Verdes.", clans: [{ name: "Clã Geto", vagas: "X" }, { name: "Clã Hyuuga", vagas: 3 }, { name: "Clã Inuzuka", vagas: 5 }, { name: "Clã Lawliet", vagas: 4 }] },
+            { name: "Vila 5: Nuvem", desc: "Região Sul. Montes Altos.", clans: [{ name: "Clã Senju", vagas: 3 }, { name: "Clã Corpus", vagas: 5 }, { name: "Clã Sparkle", vagas: 5 }] }
+        ];
+
+        window.officialMissions = [
+            { id_num: "01", title: "O Eco da Mina Esquecida", difficulty: "easy", slotsMax: 2, desc: "Explorar o Setor 4, localizar os desaparecidos e exorcizar a fonte de energia negativa (Maldições)." },
+            { id_num: "02", title: "O Comboio de Vidro", difficulty: "easy", slotsMax: 2, desc: "Escoltar o artesão ileso até a cidade comercial. Desarmar armadilhas de ninjas renegados." },
+            { id_num: "03", title: "O Mistério das Águas Escarlates", difficulty: "easy", slotsMax: 2, desc: "Subir o rio até a nascente, eliminar a fauna hostil (plantas gigantes) e purificar a água." },
+            { id_num: "04", title: "A Sombra no Orfanato", difficulty: "easy", slotsMax: 2, desc: "Rastrear a maldição parasita no subsolo e exterminá-la silenciosamente de madrugada." },
+            { id_num: "05", title: "Colheita Maldita", difficulty: "easy", slotsMax: 2, desc: "Eliminar o bando de quimeras que cospem ácido e incinerar os ninhos subterrâneos." },
+            { id_num: "06", title: "O Pergaminho do Falso Profeta", difficulty: "easy", slotsMax: 2, desc: "Prender o vigarista no templo sob efeito de incenso ilusório e recuperar os bens roubados." },
+            { id_num: "07", title: "Recuperação no Vale do Vento", difficulty: "easy", slotsMax: 2, desc: "Afastar os falcões mutantes e recuperar o cilindro de mensagens diplomáticas intacto." },
+            { id_num: "08", title: "O Ferreiro Enlouquecido", difficulty: "easy", slotsMax: 2, desc: "Desarmar o ferreiro possuído sem matá-lo, retirar a Ferramenta Amaldiçoada e selá-la." },
+            { id_num: "09", title: "Sombras no Porto", difficulty: "easy", slotsMax: 2, desc: "Interceptar contrabandistas na doca e apreender o carregamento de kunais explosivas." },
+            { id_num: "10", title: "O Guardião de Pedra", difficulty: "easy", slotsMax: 2, desc: "Destruir o núcleo de controle do Golem de Argila e escoltar os arqueólogos feridos." },
+            { id_num: "11", title: "Expresso Noturno Para Lugar Nenhum", difficulty: "medium", slotsMax: 2, desc: "Invadir o trem em movimento, limpar vagões sem ferir reféns e frear antes do abismo." },
+            { id_num: "12", title: "A Besta do Esgoto Central", difficulty: "medium", slotsMax: 2, desc: "Matar a quimera furtivamente sem acionar explosões de gás metano (proibido fogo/raios)." },
+            { id_num: "13", title: "O Templo das Sombras Dançantes", difficulty: "medium", slotsMax: 2, desc: "Navegar labirinto de luz, ultrapassar equipe rival e confiscar o Espelho Negro." },
+            { id_num: "14", title: "Caçada na Fronteira Congelada", difficulty: "medium", slotsMax: 2, desc: "Rastrear o assassino 'Agulha Fria' na nevasca (-30°C) e recuperar o pergaminho." },
+            { id_num: "15", title: "Parasitas da Alta Sociedade", difficulty: "medium", slotsMax: 2, desc: "Infiltrar o banquete, isolar conselheiros inimigos e extrair o parasita mestre do Lorde." },
+            { id_num: "16", title: "O Veneno de Hannya", difficulty: "medium", slotsMax: 2, desc: "Sobreviver à flora tóxica, neutralizar a ex-médica ninja e destruir o soro experimental." },
+            { id_num: "17", title: "Sinfonia Macabra", difficulty: "medium", slotsMax: 2, desc: "Invadir o teatro, poupar civis em transe assassino e obliterar a maldição sonora central." },
+            { id_num: "18", title: "O Roubo no Banco de Chakra", difficulty: "medium", slotsMax: 2, desc: "Desativar rede elétrica, desmantelar o esquadrão perfeito de ladrões e proteger os cofres." },
+            { id_num: "19", title: "A Névoa do Desespero", difficulty: "medium", slotsMax: 2, desc: "Resistir à tortura psicológica de clones na água e matar o conjurador escondido." },
+            { id_num: "20", title: "Prisão de Ferro Escarlate", difficulty: "medium", slotsMax: 2, desc: "Conter prisioneiros furiosos de segurança máxima e recuperar a chave mestra das celas." },
+            { id_num: "21", title: "O Útero da Quimera", difficulty: "hard", slotsMax: 2, desc: "Infiltração tática no porto. Localizar e incinerar a 'Entidade Rainha' massiva. Resgate de civis nulo." },
+            { id_num: "22", title: "Leilão das Sombras", difficulty: "hard", slotsMax: 2, desc: "Disfarce no navio-cassino. Sabotar leme, invadir cofre altamente guardado e recuperar órgão raro." },
+            { id_num: "23", title: "O Labirinto Sussurrante", difficulty: "hard", slotsMax: 2, desc: "Sobreviver a uma Expansão de Domínio natural, ignorar doppelgangers e matar o conjurador na árvore." },
+            { id_num: "24", title: "Fúria do Titã Metálico", difficulty: "hard", slotsMax: 2, desc: "Engajar marionete Golem de 3 andares. Penetrar na armadura em movimento para destruir a Cabine de Alma." },
+            { id_num: "25", title: "O Massacre do Teatro de Sangue", difficulty: "hard", slotsMax: 2, desc: "Escapar de fios invisíveis que amputam membros, matar 15 corpos-marionete e executar o Artista Macabro." },
+            { id_num: "26", title: "O Canto do Lago Morto", difficulty: "easy", slotsMax: 2, desc: "Rastrear o som, atrair a criatura mutante para a terra e eliminá-la para salvar pescadores." },
+            { id_num: "27", title: "A Caravana Assombrada", difficulty: "easy", slotsMax: 2, desc: "Proteger o mercador de caravana e quebrar os espelhos amaldiçoados secretamente." },
+            { id_num: "28", title: "A Praga de Vidro", difficulty: "easy", slotsMax: 2, desc: "Isolar e exterminar a vespa-rainha mutante sem estilhaçar a estrutura da estufa real." },
+            { id_num: "29", title: "O Ladrão de Mil Faces", difficulty: "easy", slotsMax: 2, desc: "Identificar o ninja com Henge avançado na praça comercial e capturá-lo sem causar pânico." },
+            { id_num: "30", title: "O Poço dos Lamentos", difficulty: "easy", slotsMax: 2, desc: "Descer de corda em poço com gás alucinógeno, içar civis e selar a fissura com terra." },
+            { id_num: "31", title: "O Necromante de Quintal", difficulty: "easy", slotsMax: 2, desc: "Neutralizar os zumbis de baixo nível, retirar o nobre amador em segurança e apreender pergaminho negro." },
+            { id_num: "32", title: "As Sombras da Biblioteca", difficulty: "easy", slotsMax: 2, desc: "Forçar a maldição poltergeist a sair dos papéis e exorcizá-la sem queimar nenhum livro ancestral." },
+            { id_num: "33", title: "O Despertar da Forja", difficulty: "easy", slotsMax: 2, desc: "Interceptar Slimes de Magma gerados por minério amaldiçoado e imobilizá-los como rocha." },
+            { id_num: "34", title: "O Festival do Sono", difficulty: "easy", slotsMax: 2, desc: "Identificar o ilusionista nos telhados do festival, prendê-lo e encontrar o antídoto do pó do sono." },
+            { id_num: "35", title: "Caça ao Javali Blindado", difficulty: "easy", slotsMax: 2, desc: "Focar ataques físicos apenas nas juntas da armadura de pedra para abater a besta destrutiva." },
+            { id_num: "36", title: "O Navio Fantasma da Costa Sul", difficulty: "medium", slotsMax: 2, desc: "Abordar o convés do galeão instável sob tempestade e destruir a âncora material do comandante morto." },
+            { id_num: "37", title: "A Névoa do Sono Eterno", difficulty: "medium", slotsMax: 2, desc: "Usar máscaras no aqueduto (45min limite), deter os cultistas ninja e interromper o maquinário de gás rosa." },
+            { id_num: "38", title: "O Torneio Subterrâneo", difficulty: "medium", slotsMax: 2, desc: "Infiltrar como gladiador no torneio da máfia, vencer oponentes limitando-se ao básico e resgatar a relíquia." },
+            { id_num: "39", title: "A Marionete do Deserto", difficulty: "medium", slotsMax: 2, desc: "Forçar a escotilha da besta metálica e detonar o cristal motriz." },
+            { id_num: "40", title: "A Maldição do Pintor Louco", difficulty: "medium", slotsMax: 2, desc: "Encontrar a fraqueza da tinta e exorcizar a tela-mãe na galeria." },
+            { id_num: "41", title: "O Santuário do Gelo Negro", difficulty: "medium", slotsMax: 2, desc: "Quebrar as barreiras de gelo negro e deter o sacrifício." },
+            { id_num: "42", title: "A Chuva Ácida do Exilado", difficulty: "medium", slotsMax: 2, desc: "Flanquear a montanha e emboscar o atirador de elite." },
+            { id_num: "43", title: "O Espelho da Alma Quebrada", difficulty: "medium", slotsMax: 2, desc: "Imobilizar a gangue e ativar a runa de reconfiguração do espelho." },
+            { id_num: "44", title: "O Covil da Mãe Aracnídea", difficulty: "medium", slotsMax: 2, desc: "Evacuar reféns e finalizar a Mãe Gorda sem alertar o enxame." },
+            { id_num: "45", title: "Motim no Quartel de Inverno", difficulty: "medium", slotsMax: 2, desc: "Imobilizar aliados sem matar, destruir larvas e desarmar bombas." },
+            { id_num: "46", title: "A Fome Que Caminha", difficulty: "hard", slotsMax: 2, desc: "Compreender o ciclo da Fome e detonar o núcleo com um ataque massivo." },
+            { id_num: "47", title: "A Queda do Castelo Prateado", difficulty: "hard", slotsMax: 2, desc: "Combate em gravidade zero. Reativar o magnetismo antes do impacto." },
+            { id_num: "48", title: "A Dança dos Dragões Fósseis", difficulty: "hard", slotsMax: 2, desc: "Escalar o esqueleto do dragão Alfa e arrancar a conexão do Necromante." },
+            { id_num: "49", title: "O Prisma do Tempo e Espaço", difficulty: "hard", slotsMax: 2, desc: "Decodificar enigmas dimensionais e restaurar as equações do laboratório." },
+            { id_num: "50", title: "O Eclipse da Estrela de Sangue", difficulty: "hard", slotsMax: 2, desc: "Interromper o sacrifício e obliterar o ex-comandante divinizado." }
+        ];
+
+        window.shopItems = [
+            // FERRAMENTAS
+            { id: "s1", name: "Talismã de Papel (x10)", price: 10, category: "Ferramenta", desc: "RP. Marca locais e afasta espíritos menores." },
+            { id: "s2", name: "Giz Ritualístico Branco", price: 5, category: "Ferramenta", desc: "RP. Desenhar barreiras simples no chão." },
+            { id: "s3", name: "Sal Purificado (Saco)", price: 10, category: "Ferramenta", desc: "RP. Cria linha de defesa contra Grau 4." },
+            { id: "s4", name: "Vela de Cera Comum", price: 2, category: "Ferramenta", desc: "Fornece luz precária em um raio de 3m." },
+            { id: "s5", name: "Incenso de Sândalo", price: 5, category: "Ferramenta", desc: "Acalma o ambiente (Ajuda a recuperar moral)." },
+            { id: "s6", name: "Corda de Cânhamo", price: 15, category: "Ferramenta", desc: "Ferramenta de uso geral para amarrar e escalar." },
+            { id: "s7", name: "Água Benta (Frasco)", price: 20, category: "Ferramenta", desc: "Dano leve (ácido) exclusivamente em maldições." },
+            { id: "s8", name: "Lanterna Tática", price: 40, category: "Ferramenta", desc: "Essencial para exploração no escuro total." },
+            { id: "s9", name: "Mochila Escolar", price: 30, category: "Ferramenta", desc: "Permite carregar até 10 itens pequenos extras." },
+            { id: "s10", name: "Isqueiro Zippo", price: 25, category: "Ferramenta", desc: "Fonte de fogo durável e confiável." },
+            { id: "s22", name: "Fita Silver Tape", price: 15, category: "Ferramenta", desc: "Conserta objetos temporariamente de forma improvisada." },
+            { id: "s29", name: "Amuleto de Templo", price: 15, category: "Ferramenta", desc: "Acredita-se que atrai sorte durante as jornadas." },
+            
+            // ARMAS
+            { id: "w1", name: "Bastão de Beisebol", price: 50, category: "Arma", desc: "Arma contundente que causa Dano Físico. Muito durável." },
+            { id: "w2", name: "Soco Inglês", price: 60, category: "Arma", desc: "Equipado na mão. Concede +1 Dano em ataques desarmados." },
+            { id: "w3", name: "Nunchaku de Treino", price: 100, category: "Arma", desc: "Arma flexível. Exige habilidade, concede +1 Defesa (Bloqueio)." },
+            { id: "w4", name: "Tonfa de Madeira", price: 90, category: "Arma", desc: "Arma policial clássica. Concede +1 Defesa passiva." },
+            { id: "w5", name: "Spray de Pimenta", price: 50, category: "Arma", desc: "Ataque rápido. Cega alvos humanos por 1 turno." },
+            { id: "w6", name: "Taser (Choque)", price: 120, category: "Arma", desc: "Arma de contato. Atordoa humanos (alvo precisa fazer teste de Vitalidade)." },
+            { id: "w9", name: "Machadinha", price: 100, category: "Arma", desc: "Ferramenta agressiva. Corta madeira e carne com eficiência." },
+            { id: "w10", name: "Faca de Caça", price: 110, category: "Arma", desc: "Arma perfurante pesada. Causa sangramento." },
+            { id: "w28", name: "Arco Composto", price: 400, category: "Arma", desc: "Arma de longo alcance. Consegue atingir alvos a 50m." },
+            { id: "w25", name: "Escudo de Tropa", price: 300, category: "Arma", desc: "Barreira pesada. Concede +2 de Defesa contra projéteis." },
+
+            // SHINOBI
+            { id: "n1", name: "Kunai Clássica", price: 5, category: "Shinobi", desc: "Lâmina ninja básica. Usada para arremesso ou escalada." },
+            { id: "n2", name: "Shuriken de Ferro", price: 2, category: "Shinobi", desc: "Estrela ninja. Primariamente para distração e ataque rápido a distância." },
+            { id: "n53", name: "Papel Bomba", price: 80, category: "Shinobi", desc: "Selo que causa uma Explosão Média ao ser detonado." },
+            { id: "n54", name: "Bomba de Fumaça", price: 40, category: "Shinobi", desc: "Cria nuvem densa. Concede Vantagem garantida para fuga." },
+            { id: "n58", name: "Pílula do Soldado", price: 150, category: "Shinobi", desc: "Droga estimulante. Restaura Energia em combate, causa exaustão grave após." },
+            { id: "n60", name: "Fuma Shuriken", price: 300, category: "Shinobi", desc: "Shuriken gigante de lâminas retráteis. Causa Dano Massivo." },
+            { id: "n64", name: "Espada Retrátil", price: 1500, category: "Shinobi", desc: "Oculta na manga. Garante surpresa absoluta (Vantagem no 1º atq)." },
+
+            // ELITE E ESPECIAIS
+            { id: "e1", name: "Óculos da Maki", price: 300, category: "Elite", desc: "Ferramenta essencial. Permite ver Maldições sem rolar testes." },
+            { id: "e2", name: "Revólver de Energia", price: 2000, category: "Elite", desc: "Dispara Ondas amaldiçoadas. Ignora armaduras comuns." },
+            { id: "e3", name: "Katana Amaldiçoada", price: 1500, category: "Elite", desc: "Lâmina negra imbuída. Pode cortar a matéria de fantasmas e maldições." },
+            { id: "e5", name: "Boneco Vodu", price: 800, category: "Elite", desc: "Causa dano direto na alma à distância se tiver o DNA do alvo." },
+            { id: "e15", name: "Capa de Ocultação", price: 2000, category: "Elite", desc: "Artefato raro. Furtividade perfeita enquanto imóvel." },
+            { id: "m1", name: "Nuvem Brincalhona", price: "MISSÃO", category: "Especial", desc: "Bastonete triplo. Dano escala infinitamente pela Força Física do usuário." },
+            { id: "m2", name: "Lança Invertida", price: "MISSÃO", category: "Especial", desc: "Relíquia sagrada. Anula qualquer técnica amaldiçoada ao toque." },
+            { id: "m3", name: "Espada Totsuka", price: "EVENTO", category: "Especial", desc: "Espada mística espiritual imaterial. Sela a alma de qualquer um perfurado." }
+        ];
+
+        // =======================================================================
+        // 2. FUNÇÕES DE SUPORTE E LÓGICA DE UI 
+        // =======================================================================
+
+        window.addLog = async (type, desc) => {
+            try { await addDoc(collection(db, "logs"), { type, desc, timestamp: new Date().toISOString() }); } catch(e) {}
+        };
+
+        window.getRepTitle = (pts) => {
+            if (pts >= 80) return "Lenda da Academia";
+            if (pts >= 50) return "Influente";
+            if (pts >= 20) return "Respeitado";
+            if (pts >= 0) return "Neutro";
+            if (pts >= -19) return "Desacreditado";
+            return "Pária";
+        };
+
+        const getMissionStats = (diff, id_num) => {
+            let rankL = 'D'; let rewardLunas = 50; let rewardPrestige = 5; let minPrestige = 0;
+            let idNum = parseInt(id_num);
+            if (diff === 'easy') {
+                if (idNum > 25) { rankL = 'C'; rewardLunas = 100; rewardPrestige = 10; minPrestige = 20; }
+            } else if (diff === 'medium') {
+                if (idNum > 35) { rankL = 'A'; rewardLunas = 400; rewardPrestige = 30; minPrestige = 80; }
+                else { rankL = 'B'; rewardLunas = 200; rewardPrestige = 15; minPrestige = 50; }
+            } else {
+                rankL = 'S'; rewardLunas = 800; rewardPrestige = 50; minPrestige = 100;
+            }
+            return { rankL, rewardLunas, rewardPrestige, minPrestige };
+        };
+
+        window.renderInventoryList = (inv) => {
+            if(!inv || inv.length === 0) return '<p class="text-gray-600 text-xs py-2">Mochila vazia.</p>';
+            const counts = {}; inv.forEach(x => counts[x] = (counts[x] || 0) + 1);
+            return Object.keys(counts).map(k => `<div class="bg-[#050b14] p-3 rounded-xl mb-2 text-sm text-blue-100 flex justify-between border border-blue-900/50 shadow-sm"><span>${k}</span><span class="text-cyan-400 font-bold tracking-wider">x${counts[k]}</span></div>`).join('');
+        };
+
+        window.renderCurrentMissions = () => {
+            if(!window.currentUser) return '';
+            const active = window.globalMissions.filter(m => m.participants && m.participants.some(p => p.name === window.currentUser.name));
+            if(active.length === 0) return '<p class="text-gray-600 text-xs py-2 uppercase tracking-widest font-bold">Livre de Contratos</p>';
+            return active.map(m => `<div class="bg-[#050b14] p-5 rounded-2xl mb-3 border-l-4 border-blue-500 shadow-sm"><h4 class="text-white text-sm font-bold leading-tight">${m.title}</h4><span class="text-[9px] text-blue-400 font-bold uppercase mt-2 inline-block tracking-widest bg-blue-900/20 px-2 py-1 rounded">MISSÃO ATIVA</span></div>`).join('');
+        };
+
+        // =======================================================================
+        // 3. FUNÇÕES GLOBAIS DE RENDERIZAÇÃO
+        // =======================================================================
+
+        window.switchTab = (name, btn) => {
+            window.currentTab = name;
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            if(btn) btn.classList.add('active');
+            else { document.querySelectorAll('.nav-btn').forEach(b => { if(b.title && b.title.toLowerCase().includes(name)) b.classList.add('active'); }); }
+            document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+            const target = document.getElementById('tab-' + name);
+            if(target) target.classList.add('active');
+            
+            if(name === 'profile') window.renderProfileUI();
+            if(name === 'shop') window.renderShopUI();
+            if(name === 'missions') window.renderMissions(window.globalMissions);
+            if(name === 'clans') window.renderClansUI();
+            if(name === 'ranking') window.renderRankingHTML();
+        };
+
+        window.filterShop = (cat, btn) => {
+            document.querySelectorAll('.shop-filter-btn').forEach(b => b.classList.remove('active'));
+            if(btn) btn.classList.add('active');
+            document.querySelectorAll('.shop-item').forEach(i => {
+                if (cat === 'all') { i.style.display = 'flex'; }
+                else { i.style.display = (i.getAttribute('data-category') === cat) ? 'flex' : 'none'; }
+            });
+        };
+
+        window.filterMissions = (rank, btn) => {
+            document.querySelectorAll('.mission-filter-btn').forEach(b => {
+                b.classList.remove('active', 'bg-white', 'text-black');
+                b.classList.add('border-gray-700', 'text-gray-400');
+            });
+            if(btn) {
+                btn.classList.add('active', 'bg-white', 'text-black');
+                btn.classList.remove('border-gray-700', 'text-gray-400');
+            }
+            
+            document.querySelectorAll('.mission-card').forEach(i => {
+                if (rank === 'all') { i.style.display = 'flex'; }
+                else { i.style.display = (i.getAttribute('data-rank') === rank) ? 'flex' : 'none'; }
+            });
+        };
+
+        window.handleSearch = (q) => {
+            const low = q.toLowerCase();
+            if(window.currentTab === 'shop') document.querySelectorAll('.shop-item').forEach(i => i.style.display = i.innerText.toLowerCase().includes(low) ? 'flex' : 'none');
+            if(window.currentTab === 'missions') window.renderMissions(window.globalMissions.filter(m => m.title.toLowerCase().includes(low)));
+            if(window.currentTab === 'clans') document.querySelectorAll('.clan-card').forEach(i => i.style.display = i.innerText.toLowerCase().includes(low) ? 'flex' : 'none');
+        };
+
+        window.renderShopUI = () => {
+            const grid = document.getElementById('shop-grid-container');
+            if(!grid || !window.shopItems) return;
+            
+            grid.innerHTML = window.shopItems.map(item => `
+                <div class="shop-item group" data-category="${item.category}" onclick="window.showItemDetails('${item.id}')">
+                    <div>
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="text-[9px] uppercase font-bold text-blue-300 bg-blue-900/30 px-3 py-1 rounded-md border border-blue-900/50">${item.category}</span>
+                            <span class="text-cyan-400 font-title font-bold text-lg leading-none">${item.price}${item.price==='MISSÃO'?'':' L'}</span>
+                        </div>
+                        <h4 class="text-white font-bold text-lg leading-tight mb-2 group-hover:text-cyan-400 transition">${item.name}</h4>
+                        <p class="text-[11px] text-gray-400 h-10 overflow-hidden line-clamp-2 leading-relaxed">${item.desc}</p>
+                    </div>
+                    <div class="pt-3 mt-4 border-t border-gray-800/80 text-center uppercase text-[9px] font-bold text-gray-500 group-hover:text-white transition tracking-widest"><i class="fas fa-search-plus mr-1"></i> Inspecionar Item</div>
+                </div>
+            `).join('');
+        };
+
+        window.showItemDetails = (id) => {
+            const item = window.shopItems.find(i => i.id === id);
+            if(!item) return;
+            
+            const isBuyable = item.price !== "MISSÃO" && item.price !== "EVENTO";
+            const userBal = window.currentUser ? window.currentUser.balance : 0;
+            const price = isBuyable ? parseInt(item.price) : 0;
+            const newBal = userBal - price;
+
+            Swal.fire({
+                title: 'Aquisição de Arsenal',
+                html: `
+                    <div class="text-left mt-2">
+                        <div class="bg-[#020617] p-5 rounded-2xl border border-blue-900/50 mb-5 shadow-inner">
+                            <span class="text-[10px] text-blue-400 font-bold uppercase tracking-widest mb-1 block">${item.category}</span>
+                            <h3 class="text-white font-bold text-2xl mb-2">${item.name}</h3>
+                            <p class="text-gray-400 text-sm leading-relaxed">${item.desc}</p>
+                        </div>
+                        <div class="space-y-3 text-sm px-2">
+                            <div class="flex justify-between items-center"><span class="text-gray-500 font-bold uppercase text-xs">Seu Saldo em Lunas:</span><span class="text-blue-400 font-title text-xl">${userBal} L</span></div>
+                            <div class="flex justify-between items-center"><span class="text-gray-500 font-bold uppercase text-xs">Custo da Manutenção:</span><span class="text-red-400 font-title text-xl">-${price} L</span></div>
+                            <div class="border-t border-gray-800/80 my-3"></div>
+                            <div class="flex justify-between items-center"><span class="text-white font-bold uppercase text-xs">Saldo após compra:</span><span class="${newBal >= 0 ? 'text-green-400' : 'text-red-500'} font-title font-bold text-2xl">${newBal} L</span></div>
+                        </div>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: isBuyable ? 'Confirmar Transação' : 'Fechar Visor',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: isBuyable ? '#2563eb' : '#334155',
+                customClass: { popup: 'border border-blue-900/50 shadow-2xl rounded-3xl bg-[#0a1128]' }
+            }).then(r => { if(r.isConfirmed && isBuyable) window.processPurchase(item); });
+        };
+
+        window.processPurchase = async function(item) {
+            if(!window.currentUser) return Swal.fire('Acesso Negado', 'Você precisa logar no perfil da Academia primeiro.', 'info');
+            if(window.currentUser.balance < item.price) return Swal.fire('Fundo Insuficiente', 'A Academia não aprova vendas fiado. Complete missões.', 'error');
+            
+            const newBal = window.currentUser.balance - item.price;
+            window.currentUser.balance = newBal;
+            if(!window.currentUser.inventory) window.currentUser.inventory = [];
+            window.currentUser.inventory.push(item.name);
+            localStorage.setItem('jjk_user', JSON.stringify(window.currentUser));
+            window.updateTopHeader();
+            
+            try {
+                await updateDoc(doc(db, "users", window.currentUser.id), { balance: newBal, inventory: arrayUnion(item.name) });
+                window.addLog('Loja', `O jogador [${window.currentUser.name}] comprou o equipamento [${item.name}].`);
+                Swal.fire({toast: true, position: 'top-end', icon: 'success', title: 'Equipamento adicionado à mochila!', showConfirmButton: false, timer: 2500});
+            } catch (error) {
+                console.error("Firestore update failed, state kept locally", error);
+            }
+        };
+
+        window.renderMissions = (arr) => {
+            const grid = document.getElementById('missions-grid-container');
+            if(!grid) return;
+            if(arr.length === 0) { 
+                grid.innerHTML = `
+                <div class="col-span-full flex flex-col items-center justify-center py-20 bg-[#0a1128] rounded-[40px] border border-blue-900/30">
+                    <i class="fas fa-file-contract text-6xl text-blue-900/50 mb-6"></i>
+                    <p class="text-blue-300 mb-8 font-bold uppercase tracking-widest">O Quadro de Contratos está Vazio</p>
+                    <button onclick="window.seedMissions()" class="bg-blue-600 hover:bg-blue-500 px-10 py-4 rounded-full text-white font-bold shadow-glow uppercase text-xs transition transform hover:scale-105">
+                        <i class="fas fa-upload mr-2"></i> Puxar 50 Missões Oficiais do Servidor
+                    </button>
+                </div>`; 
+                return; 
+            }
+            
+            const order = { 'easy': 1, 'medium': 2, 'hard': 3 };
+            let sorted = [...arr].sort((a,b) => (order[a.difficulty]||0) - (order[b.difficulty]||0));
+
+            grid.innerHTML = sorted.map(m => {
+                let cur = m.participants ? m.participants.length : 0;
+                let full = cur >= m.slotsMax;
+                let color = m.difficulty === 'hard' ? '#ef4444' : (m.difficulty === 'medium' ? '#eab308' : '#2563eb');
+                
+                const stats = getMissionStats(m.difficulty, m.id ? m.id.replace('m_','') : m.id_num);
+                let rankL = stats.rankL;
+                
+                return `
+                <div class="mission-card group" data-rank="${rankL}" style="border-left-color: ${color}" onclick="window.showMissionDetails('${m.id}')">
+                    <div class="flex items-center gap-4 mb-5">
+                        <div class="mission-rank-badge shadow-lg group-hover:scale-110 transition" style="background: ${color}">${rankL}</div>
+                        <div>
+                            <h3 class="text-white font-bold text-lg leading-tight group-hover:text-blue-400 transition">${m.title}</h3>
+                            <span class="text-[10px] text-gray-500 uppercase font-bold tracking-widest mt-1 inline-block" style="color: ${color}">Rank de Ameaça: ${m.difficulty}</span>
+                        </div>
+                    </div>
+                    <p class="text-[13px] text-gray-400 mb-6 leading-relaxed line-clamp-3 h-[60px] overflow-hidden">${m.desc}</p>
+                    <div class="flex gap-4 items-center text-xs font-bold pt-4">
+                        <div class="text-yellow-500 flex items-center gap-1"><i class="fas fa-coins text-yellow-500"></i> <span>${stats.rewardLunas}</span></div>
+                        <div class="text-purple-400 flex items-center gap-1"><i class="far fa-star"></i> <span>+${stats.rewardPrestige}</span></div>
+                        <div class="${full?'text-red-500':'text-cyan-400'} flex items-center gap-1 ml-auto"><i class="fas fa-users"></i> <span>${cur}/${m.slotsMax}</span></div>
+                    </div>
+                    ${!window.currentUser || window.currentUser.prestige < stats.minPrestige ? `<div class="mt-4 text-[10px] text-red-500/80 font-bold bg-red-900/10 px-2 py-1 rounded inline-block"><i class="fas fa-exclamation-circle"></i> Requer ${stats.minPrestige} de prestígio</div>` : ''}
+                </div>`;
+            }).join('');
+        };
+
+        window.showMissionDetails = (id) => {
+            const m = window.globalMissions.find(x => x.id === id);
+            if(!m) return;
+            
+            const stats = getMissionStats(m.difficulty, m.id ? m.id.replace('m_','') : '01');
+            let cur = m.participants ? m.participants.length : 0;
+            let pList = m.participants && m.participants.length > 0 ? m.participants.map(p => p.name).join(', ') : 'Nenhum participante ainda.';
+            let userPrestige = window.currentUser ? window.currentUser.prestige : 0;
+            let hasPrestige = userPrestige >= stats.minPrestige;
+            let isFull = cur >= m.slotsMax;
+            let color = m.difficulty === 'hard' ? '#ef4444' : (m.difficulty === 'medium' ? '#eab308' : '#2563eb');
+            
+            let btnText = "Participar"; let btnColor = "#2563eb"; let btnDisabled = "";
+            if (!window.currentUser) { btnText = "Faça Login para Participar"; btnColor = "#475569"; btnDisabled = "disabled"; }
+            else if (m.participants && m.participants.some(p => p.name === window.currentUser.name)) { btnText = "Você já está nesta missão"; btnColor = "#10b981"; btnDisabled = "disabled"; }
+            else if (isFull) { btnText = "Equipe Fechada"; btnColor = "#475569"; btnDisabled = "disabled"; }
+            else if (!hasPrestige) { btnText = "Prestígio Insuficiente"; btnColor = "#ef4444"; btnDisabled = "disabled"; }
+
+            Swal.fire({
+                title: `<div class="flex items-center gap-4 text-left"><div class="mission-rank-badge flex-shrink-0" style="background: ${color}">${stats.rankL}</div><div><div class="text-xl font-bold text-white leading-tight">${m.title}</div><div class="text-[10px] text-gray-500 uppercase tracking-widest mt-1">Missão Rank ${stats.rankL}</div></div></div>`,
+                html: `
+                    <div class="text-left mt-6">
+                        <p class="text-gray-300 text-sm leading-relaxed mb-6">${m.desc}</p>
+                        <div class="bg-[#050b14] rounded-2xl border border-gray-800 p-5 space-y-4 mb-6">
+                            <div class="flex justify-between items-center text-sm"><span class="text-gray-400 font-bold">Recompensa em Lunas</span><span class="text-yellow-500 font-title font-bold text-lg"><i class="fas fa-coins mr-1"></i> ${stats.rewardLunas} L</span></div>
+                            <div class="flex justify-between items-center text-sm"><span class="text-gray-400 font-bold">Recompensa em Prestígio</span><span class="text-purple-400 font-title font-bold text-lg"><i class="far fa-star mr-1"></i> +${stats.rewardPrestige}</span></div>
+                            <div class="flex justify-between items-center text-sm"><span class="text-gray-400 font-bold">Vagas</span><span class="text-white font-bold">${cur}/${m.slotsMax}</span></div>
+                            <div class="border-t border-gray-800 my-2"></div>
+                            <div class="flex justify-between items-center text-sm"><span class="text-gray-400 font-bold">Prestígio Mínimo</span><span class="${hasPrestige ? 'text-green-400' : 'text-red-500'} font-bold">${stats.minPrestige} Pts</span></div>
+                        </div>
+                        <div class="mb-2">
+                            <h4 class="text-white font-bold text-sm mb-2 uppercase tracking-widest">Participantes Registrados</h4>
+                            <p class="text-gray-500 text-xs p-3 bg-gray-900 rounded-xl">${pList}</p>
+                        </div>
+                    </div>
+                `,
+                showCancelButton: true,
+                showConfirmButton: btnDisabled === "",
+                confirmButtonText: btnText,
+                cancelButtonText: 'Fechar',
+                confirmButtonColor: btnColor,
+                customClass: { popup: 'bg-[#0a1128] border border-blue-900/40 rounded-[30px] shadow-2xl' }
+            }).then(r => {
+                if(r.isConfirmed && btnDisabled === "") window.acceptMission(m.id);
+            });
+        };
+
+        window.renderRankingHTML = () => {
+            const list = document.getElementById('ranking-list-container');
+            if(!list) return;
+            if(window.globalUsers.length === 0) { list.innerHTML = `<p class="text-center text-gray-500 py-10 font-medium uppercase tracking-widest text-xs col-span-full">Mural Deserto.</p>`; return; }
+            
+            let sortedUsers = [...window.globalUsers].sort((a,b) => b.prestige - a.prestige);
+
+            list.innerHTML = sortedUsers.map((u, i) => `
+                <div class="rank-card-large w-full mb-10 transform hover:scale-105 transition">
+                    <span class="rank-number-top text-${i===0?'yellow-500':(i===1?'gray-300':(i===2?'orange-400':'white'))}">#${i+1}</span>
+                    <div class="relative inline-block mb-4">
+                        <img src="${u.avatar}" class="rank-avatar-large shadow-2xl border-${i===0?'yellow-500':(i===1?'gray-300':(i===2?'orange-400':'gray-700'))}">
+                        ${i===0 ? `<div class="absolute bottom-2 right-2 w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center text-black border-4 border-[#0a1128]"><i class="fas fa-crown text-sm"></i></div>` : ''}
+                    </div>
+                    <h3 class="text-white font-bold text-3xl mb-1">${u.name}</h3>
+                    <p class="text-blue-400 text-sm font-bold uppercase tracking-widest mb-8 bg-blue-900/20 px-4 py-1 rounded-full border border-blue-900/50 inline-block">${window.getRepTitle(u.prestige)}</p>
+                    <div class="border-t border-gray-800/50 pt-8 w-full">
+                        <span class="text-6xl font-title text-white font-bold tracking-tighter">${u.prestige}</span>
+                        <p class="text-[10px] text-gray-500 uppercase font-bold tracking-[0.2em] mt-2">Pontos de Prestígio</p>
+                    </div>
+                </div>
+            `).join('');
+        };
+
+        window.renderClansUI = () => {
+            const grid = document.getElementById('clans-grid-container');
+            if(!grid || !window.villagesData) return;
+            let html = "";
+            window.villagesData.forEach(v => {
+                html += `<div class="col-span-full border-b border-gray-800/50 pb-3 mt-6"><h3 class="text-2xl font-bold text-blue-400 font-title uppercase tracking-wider">${v.name}</h3><p class="text-[11px] text-gray-500 font-medium uppercase tracking-widest mt-1">${v.desc}</p></div><div class="grid grid-cols-1 md:grid-cols-3 gap-5 mt-5">`;
+                v.clans.forEach(c => {
+                    const closed = c.vagas === "X";
+                    html += `<div class="clan-card relative p-6 bg-[#0f172a] rounded-3xl group shadow-sm hover:shadow-glow" onclick="window.joinClan('${c.name}', '${c.vagas}')">
+                        <div class="flex flex-col gap-2">
+                            <span class="text-[10px] font-bold uppercase ${closed?'text-red-500 bg-red-900/20 border-red-900/50':'text-blue-400 bg-blue-900/20 border-blue-900/50'} px-3 py-1 rounded-lg inline-block w-max border">${closed?'Fechado':c.vagas + ' Vagas abertas'}</span>
+                            <span class="text-white font-bold text-2xl group-hover:text-blue-400 transition">${c.name}</span>
+                        </div>
+                        <i class="fas ${closed ? 'fa-lock text-red-900/30' : 'fa-sign-in-alt text-blue-500 opacity-20 group-hover:opacity-100 group-hover:translate-x-2'} transition-all text-2xl"></i>
+                    </div>`;
+                });
+                html += `</div>`;
+            });
+            grid.innerHTML = html;
+        };
+
+        window.renderProfileUI = () => {
+            const cont = document.getElementById('profile-content-container');
+            if(!cont) return;
+            
+            if(!window.currentUser) { 
+                cont.innerHTML = `
+                <div class="max-w-md mx-auto bg-[#0a1128] p-12 rounded-[40px] text-center border border-gray-800 shadow-2xl mt-10">
+                    <div class="w-20 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-glow">
+                        <i class="fas fa-id-card text-3xl text-white"></i>
+                    </div>
+                    <h2 class="text-white text-3xl font-extrabold mb-10 uppercase tracking-widest font-title">IDENTIFIQUE-SE</h2>
+                    <div class="text-left mb-5">
+                        <label class="text-[10px] text-blue-400 font-bold uppercase tracking-widest ml-4 mb-2 block">Nome de Ficha Completo</label>
+                        <input type="text" id="login-name" class="input-dark" placeholder="Nome Completo do Aluno / Personagem">
+                    </div>
+                    <div class="text-left mb-8">
+                        <label class="text-[10px] text-blue-400 font-bold uppercase tracking-widest ml-4 mb-2 block">Pin de Acesso</label>
+                        <input type="password" id="login-pin" class="input-dark text-center tracking-[0.5em] font-bold" placeholder="4 Dígitos" maxlength="4">
+                    </div>
+                    <button onclick="window.loginUser()" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-2xl text-white font-bold uppercase text-sm shadow-glow tracking-widest transition">Acessar Ficha de Aluno</button>
+                </div>`; 
+                return; 
+            }
+            
+            const repTitle = window.getRepTitle(window.currentUser.prestige);
+            cont.innerHTML = `
+                <div class="max-w-5xl mx-auto bg-[#0a1128] p-10 md:p-12 rounded-[45px] flex flex-col lg:flex-row gap-12 border border-blue-900/40 relative overflow-hidden shadow-2xl">
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-blue-600/5 blur-[100px] rounded-full pointer-events-none"></div>
+                    
+                    <div class="text-center w-full lg:w-1/3 z-10 flex flex-col items-center">
+                        <div class="relative group cursor-pointer" onclick="document.getElementById('avatar-edit-file').click()">
+                            <img src="${window.currentUser.avatar}" class="w-32 h-32 md:w-48 md:h-48 rounded-full object-cover border-4 border-blue-900/80 mb-6 shadow-glow mx-auto">
+                            <div class="absolute inset-0 bg-black/70 rounded-full opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-xs font-bold uppercase tracking-widest backdrop-blur-sm"><i class="fas fa-camera mr-2"></i> Mudar Foto</div>
+                        </div>
+                        <input type="file" id="avatar-edit-file" class="hidden" accept="image/*" onchange="window.handleImageUpdate(this)">
+                        <h2 class="text-white text-3xl md:text-4xl font-extrabold leading-none mb-3 font-title">${window.currentUser.name}</h2>
+                        <span class="text-blue-400 text-[10px] font-bold uppercase border border-blue-400/20 px-4 py-1.5 rounded-full bg-blue-900/10 tracking-widest cursor-pointer hover:bg-blue-900/40 transition" onclick="window.switchTab('clans')">${window.currentUser.group} <i class="fas fa-pen ml-1"></i></span>
+                    </div>
+                    
+                    <div class="flex-grow w-full z-10">
+                        <div class="grid grid-cols-2 gap-5 mb-8">
+                            <div class="bg-[#050b14] p-6 md:p-7 rounded-[28px] text-center border border-blue-900/40 shadow-sm relative overflow-hidden">
+                                <i class="fas fa-coins absolute -right-4 -bottom-4 text-6xl text-cyan-900/20"></i>
+                                <p class="text-3xl md:text-4xl font-title text-cyan-400 font-bold">${window.currentUser.balance} L</p>
+                                <p class="text-[10px] text-gray-500 uppercase font-bold mt-2 tracking-widest">Saldo Financeiro</p>
+                            </div>
+                            <div class="bg-[#050b14] p-6 md:p-7 rounded-[28px] text-center border border-blue-900/40 shadow-sm relative overflow-hidden">
+                                <i class="fas fa-star absolute -left-4 -top-4 text-6xl text-blue-900/20"></i>
+                                <p class="text-3xl md:text-4xl font-title text-blue-500 font-bold">${window.currentUser.prestige}</p>
+                                <p class="text-[10px] text-gray-500 uppercase font-bold mt-2 tracking-widest">${repTitle}</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="bg-[#050b14] p-6 rounded-[30px] border border-blue-900/30 shadow-inner">
+                                <h3 class="text-[11px] font-bold text-gray-400 uppercase mb-5 tracking-widest flex items-center gap-2"><i class="fas fa-box-open text-blue-500"></i> Sua Mochila</h3>
+                                <div class="max-h-56 overflow-y-auto pr-2 custom-scrollbar">
+                                    ${window.renderInventoryList(window.currentUser.inventory)}
+                                </div>
+                            </div>
+                            <div class="bg-[#050b14] p-6 rounded-[30px] border border-blue-900/30 shadow-inner">
+                                <h3 class="text-[11px] font-bold text-gray-400 uppercase mb-5 tracking-widest flex items-center gap-2"><i class="fas fa-scroll text-blue-500"></i> Contratos Ativos</h3>
+                                <div class="max-h-56 overflow-y-auto pr-2 custom-scrollbar">
+                                    ${window.renderCurrentMissions()}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-10 flex flex-col md:flex-row justify-between items-center border-t border-gray-800/60 pt-6 gap-4">
+                            <button onclick="window.resetCharacter()" class="text-red-500 text-xs font-bold uppercase flex items-center gap-2 hover:bg-red-900/20 px-4 py-2 rounded-xl transition"><i class="fas fa-skull"></i> Destruir Arquivo</button>
+                            <button onclick="window.logout()" class="w-full md:w-auto bg-gray-800 text-white px-10 py-4 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-gray-700 transition shadow-glow">Desconectar</button>
+                        </div>
+                    </div>
+                </div>`;
+        };
+
+        window.renderAdminLogs = function() {
+            const tbody = document.getElementById('admin-logs-list');
+            if(!tbody) return;
+            if(window.globalLogs.length === 0) { tbody.innerHTML = "<tr><td class='text-gray-500 py-4 text-xs uppercase tracking-widest'>O sistema ainda não possui registros.</td></tr>"; return; }
+            
+            tbody.innerHTML = window.globalLogs.slice(0, 100).map(log => {
+                let d = new Date(log.timestamp);
+                let dateStr = d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+                let badge = log.type === 'Loja' ? 'bg-cyan-900/30 text-cyan-400 border-cyan-900/50' : 
+                           (log.type === 'Missão' ? 'bg-yellow-900/30 text-yellow-500 border-yellow-900/50' : 
+                           (log.type === 'Mestre' ? 'bg-red-900/30 text-red-400 border-red-900/50' : 'bg-gray-800 text-gray-300 border-gray-700'));
+                
+                return `
+                <tr class="border-b border-gray-900 hover:bg-gray-900 transition">
+                    <td class="py-3 text-[10px] text-gray-500 whitespace-nowrap w-32 font-bold">${dateStr}</td>
+                    <td class="py-3 w-32"><span class="text-[9px] font-bold uppercase ${badge} px-2 py-1 rounded inline-block tracking-widest border">${log.type}</span></td>
+                    <td class="py-3 text-sm text-gray-300 w-full">${log.desc}</td>
+                </tr>`;
+            }).join('');
+        };
+
+        window.renderAdminUsers = function() {
+            const t = document.getElementById('admin-user-list');
+            if(!t) return;
+            t.innerHTML = `<tr class="text-[10px] text-gray-500 uppercase border-b border-gray-800 tracking-widest"><th class="pb-3 pl-2">Nome</th><th class="pb-3 text-center">Saldo</th><th class="pb-3 text-center">Prestígio</th><th class="pb-3 text-right pr-2">Ações</th></tr>` + window.globalUsers.map(u => `
+                <tr class="border-b border-gray-900 transition hover:bg-[#050b14]">
+                    <td class="py-4 pl-2 text-white font-bold text-sm">${u.name}</td>
+                    <td class="py-4 text-center text-cyan-400 font-bold font-title text-lg">${u.balance} <span class="text-xs">L</span></td>
+                    <td class="py-4 text-center text-blue-400 font-bold font-title text-lg">${u.prestige}</td>
+                    <td class="flex justify-end gap-3 py-4 pr-2">
+                        <button onclick="window.adminEditBalance('${u.id}', ${u.balance}, '${u.name}')" class="bg-cyan-900/20 text-cyan-400 px-4 py-2 rounded-xl text-xs font-bold border border-cyan-900/50 hover:bg-cyan-900/50 transition">L$ Editar</button>
+                        <button onclick="window.adminEditPrestige('${u.id}', ${u.prestige}, '${u.name}')" class="bg-blue-900/20 text-blue-400 px-4 py-2 rounded-xl text-xs font-bold border border-blue-900/50 hover:bg-blue-900/50 transition"><i class="fas fa-star mr-1"></i> Pts</button>
+                        <button onclick="window.adminDeleteUser('${u.id}', '${u.name}')" class="bg-red-900/20 text-red-500 px-4 py-2 rounded-xl text-xs border border-red-900/50 hover:bg-red-900/50 transition"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        };
+
+        window.updateTopHeader = () => {
+            const u = window.currentUser;
+            if(!u) return;
+            document.getElementById('header-username').innerText = u.name.split(' ')[0];
+            document.getElementById('header-avatar').src = u.avatar;
+        };
+
+        // =======================================================================
+        // 4. AÇÕES DE BOTÕES (UI ACTIONS)
+        // =======================================================================
+
+        window.joinClan = async (name, v) => {
+            if(!window.currentUser) return Swal.fire('Acesso Restrito', 'Faça login pelo Perfil primeiro.', 'warning');
+            
+            // SE FOR UM CLÃ FECHADO, PEDIR SENHA DO ADMIN (NOVO FLUXO)
+            if(v === 'X') {
+                const { value: p } = await Swal.fire({ 
+                    title: `Acesso Restrito: ${name}`, 
+                    text: 'Este clã está fechado. Apenas a Administração pode autorizar a entrada.', 
+                    input: 'password', 
+                    inputPlaceholder: 'Senha do Administrador',
+                    showCancelButton: true,
+                    confirmButtonColor: '#2563eb',
+                    cancelButtonColor: '#475569',
+                    confirmButtonText: 'Autorizar'
+                });
+                
+                if (p === 'admin123') {
+                    try {
+                        await updateDoc(doc(db, "users", window.currentUser.id), { group: name });
+                    } catch (e) {
+                        console.error("Erro na database, utilizando estado local", e);
+                    }
+                    window.currentUser.group = name; 
+                    localStorage.setItem('jjk_user', JSON.stringify(window.currentUser));
+                    window.addLog('Clã', `A Administração AUTORIZOU o jogador [${window.currentUser.name}] a entrar no clã fechado [${name}].`);
+                    window.renderProfileUI();
+                    Swal.fire({toast: true, position: 'top-end', icon: 'success', title: 'Autorização concedida!', showConfirmButton: false, timer: 2000});
+                } else if (p) {
+                    Swal.fire('Acesso Negado', 'Senha incorreta.', 'error');
+                }
+                return;
+            }
+            
+            // SE FOR UM CLÃ ABERTO (FLUXO NORMAL)
+            const r = await Swal.fire({ title: `Unir-se ao ${name}?`, text: "Em ON, você realmente pertence a este clã?", icon: 'question', showCancelButton: true, confirmButtonColor: '#2563eb' });
+            if(r.isConfirmed) {
+                try {
+                    await updateDoc(doc(db, "users", window.currentUser.id), { group: name });
+                } catch (e) {
+                    console.error("Firestore update failed, relying on local state");
+                }
+                window.currentUser.group = name; localStorage.setItem('jjk_user', JSON.stringify(window.currentUser));
+                window.addLog('Clã', `O jogador [${window.currentUser.name}] foi aprovado no [${name}].`);
+                window.renderProfileUI();
+                Swal.fire({toast: true, position: 'top-end', icon: 'success', title: 'Afiliado!', showConfirmButton: false, timer: 1500});
+            }
+        };
+
+        window.acceptMission = async (id) => {
+            if(!window.currentUser) return Swal.fire('Acesso Restrito', 'Logue no perfil para assinar.', 'info');
+            const m = window.globalMissions.find(x => x.id === id);
+            if(!m) return;
+            if(m.participants && m.participants.some(p => p.name === window.currentUser.name)) return Swal.fire('Ops', 'Você já está nessa missão.', 'info');
+            if(m.participants && m.participants.length >= m.slotsMax) return;
+            
+            try {
+                await updateDoc(doc(db, "missions", id), { participants: arrayUnion({name: window.currentUser.name}) });
+                window.addLog('Missão', `O jogador [${window.currentUser.name}] assinou contrato para: [${m.title}].`);
+                Swal.fire({toast: true, position: 'top-end', icon: 'success', title: 'Contrato Assinado!', showConfirmButton: false, timer: 2000});
+            } catch (e) {
+                Swal.fire('Erro', 'Houve um erro ao processar. Certifique-se de que as missões foram carregadas no Painel Admin.', 'error');
+            }
+        };
+
+        window.seedMissions = async () => {
+            Swal.fire({ title: 'Carregando 50 Missões...', text: 'Sincronizando banco de dados com os parâmetros oficiais.', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            try {
+                for(let m of window.officialMissions) {
+                    await setDoc(doc(db, "missions", m.id_num), { title: m.title, difficulty: m.difficulty, slotsMax: m.slotsMax, desc: m.desc, participants: [] });
+                }
+                window.addLog('Mestre', `O Administrador populou o quadro com as 50 missões oficiais do manual.`);
+                Swal.close();
+                Swal.fire('Quadro Restaurado', 'As 50 missões oficiais estão disponíveis para os alunos.', 'success');
+            } catch(e) {
+                console.error(e);
+                Swal.fire('Erro', 'O Firebase bloqueou a escrita. Verifique as permissões de rede.', 'error');
+            }
+        };
+
+        window.clearMissionsData = async () => {
+            const { isConfirmed } = await Swal.fire({ title: 'Resetar Semana?', text: 'Zerar todas as vagas de todos os contratos abertos?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#dc2626' });
+            if(isConfirmed) {
+                Swal.fire({ title: 'Limpando...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                try {
+                    const s = await getDocs(collection(db, "missions"));
+                    for (const d of s.docs) { await updateDoc(doc(db, "missions", d.id), { participants: [] }); }
+                    window.addLog('Mestre', `O Administrador limpou as vagas e resetou a temporada de missões.`);
+                    Swal.fire('Temporada Limpa', 'Todos os contratos estão vazios novamente.', 'success');
+                } catch (e) {
+                    Swal.fire('Erro', 'Ocorreu um erro. Certifique-se de que o banco existe.', 'error');
+                }
+            }
+        };
+
+        window.openAdminPanel = async () => {
+            const { value: p } = await Swal.fire({ title: 'Autenticação Mestre', input: 'password', confirmButtonColor: '#2563eb' });
+            if(p === 'admin123') { window.switchTab('admin'); window.renderAdminUsers(); window.renderAdminLogs(); }
+            else if(p) { Swal.fire('Acesso Negado', 'Senha incorreta.', 'error'); }
+        };
+
+        window.adminEditBalance = async (uid, cur, n) => {
+            const { value: v } = await Swal.fire({ title: `Saldo: ${n}`, input: 'number', inputValue: cur, confirmButtonText: 'Gravar' });
+            if(v !== undefined) { 
+                await updateDoc(doc(db, "users", uid), { balance: parseInt(v) }); 
+                window.addLog('Mestre', `O Administrador alterou o saldo de [${n}] para [${v} L].`); 
+            }
+        };
+
+        window.adminEditPrestige = async (uid, cur, n) => {
+            const { value: v } = await Swal.fire({ title: `Prestígio: ${n}`, input: 'number', inputValue: cur, confirmButtonText: 'Gravar' });
+            if(v !== undefined) { 
+                await updateDoc(doc(db, "users", uid), { prestige: parseInt(v) }); 
+                window.addLog('Mestre', `O Administrador alterou o prestígio de [${n}] para [${v} Pts].`); 
+            }
+        };
+
+        window.adminDeleteUser = async (uid, n) => {
+            const { isConfirmed } = await Swal.fire({ title: `Apagar ficha de ${n}?`, text: 'Ação irreversível!', icon: 'error', showCancelButton: true, confirmButtonColor: '#dc2626' });
+            if(isConfirmed) { 
+                await deleteDoc(doc(db, "users", uid)); 
+                window.addLog('Mestre', `A ficha do jogador [${n}] foi DELETADA pelo sistema.`); 
+            }
+        };
+
+        window.handleImageUpdate = (input) => {
+            const file = input.files[0];
+            if(!file || !window.currentUser) return;
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const img = new Image();
+                img.onload = async () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 250; canvas.height = 250;
+                    canvas.getContext('2d').drawImage(img, 0, 0, 250, 250);
+                    const base64 = canvas.toDataURL('image/jpeg', 0.8);
+                    window.currentUser.avatar = base64;
+                    localStorage.setItem('jjk_user', JSON.stringify(window.currentUser));
+                    
+                    try {
+                        await updateDoc(doc(db, "users", window.currentUser.id), { avatar: base64 });
+                    } catch (err) {
+                        console.error("Local avatar updated, but firestore failed.");
+                    }
+                    window.renderProfileUI();
+                    window.updateTopHeader();
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        };
+
+        window.loginUser = async () => {
+            const name = document.getElementById('login-name').value.trim();
+            const pin = document.getElementById('login-pin').value.trim();
+            if(!name || !pin) return Swal.fire('Atenção', 'Preencha o Nome e o PIN numérico.', 'warning');
+            
+            Swal.fire({ title: 'Autenticando...', background: '#0a1128', color: '#fff', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            
+            const userId = name.toLowerCase().replace(/[^a-z0-9]/g, '_');
+            const docRef = doc(db, "users", userId);
+            
+            try {
+                const snap = await getDoc(docRef);
+                
+                if(snap.exists()){
+                    const d = snap.data();
+                    if(d.pin === pin) { 
+                        window.currentUser = d; localStorage.setItem('jjk_user', JSON.stringify(d)); 
+                        window.updateTopHeader(); window.renderProfileUI(); 
+                        Swal.close();
+                    } else {
+                        Swal.fire('Acesso Negado', 'O PIN inserido está incorreto.', 'error');
+                    }
+                } else {
+                    const avatar = document.getElementById('temp-avatar') ? document.getElementById('temp-avatar').value : "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png";
+                    const newUser = { id: userId, name, pin, prestige: 0, balance: 500, inventory: [], avatar: avatar, group: "Civil (Sem Afiliação)" };
+                    await setDoc(docRef, newUser);
+                    window.currentUser = newUser; localStorage.setItem('jjk_user', JSON.stringify(newUser)); 
+                    window.addLog('Sistema', `Novo aluno registrado na base: [${name}].`);
+                    window.updateTopHeader(); window.renderProfileUI();
+                    Swal.fire('Entrada Autorizada', 'Você ganhou 500 Lunas da Academia para comprar equipamentos.', 'success');
+                }
+            } catch(e) { 
+                console.error(e); 
+                Swal.fire('Erro', 'Falha na conexão de rede. Crie sua conta mais tarde.', 'error'); 
+            }
+        };
+
+        window.logout = () => { localStorage.removeItem('jjk_user'); window.currentUser = null; location.reload(); };
+        
+        window.resetCharacter = async () => {
+            if(!window.currentUser) return;
+            const { isConfirmed } = await Swal.fire({ title: 'Aniquilar Ficha?', text: "Você perderá seu dinheiro, reputação e itens para sempre.", icon: 'warning', showCancelButton: true, confirmButtonColor: '#dc2626' });
+            if(isConfirmed) { 
+                window.addLog('Sistema', `O jogador [${window.currentUser.name}] apagou a própria ficha voluntariamente.`);
+                try {
+                    await deleteDoc(doc(db, "users", window.currentUser.id)); 
+                } catch (e) {
+                    console.error("Local delete done, DB delete failed.");
+                }
+                window.logout(); 
+            }
+        };
+
+        // =======================================================================
+        // 5. INÍCIO DA CONEXÃO FIREBASE (LISTENERS) E RENDERIZAÇÃO ESTÁTICA
+        // =======================================================================
+        
+        // Protege contra falhas de conexão iniciais no painel
+        try {
+            onSnapshot(query(collection(db, "users"), orderBy("prestige", "desc")), snap => {
+                window.globalUsers = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                window.renderRankingHTML();
+                if(window.currentTab === 'admin') window.renderAdminUsers();
+            });
+            
+            onSnapshot(collection(db, "missions"), snap => {
+                window.globalMissions = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                if(window.currentTab === 'missions') window.renderMissions(window.globalMissions);
+                if(window.currentTab === 'profile') window.renderProfileUI();
+            });
+            
+            onSnapshot(query(collection(db, "logs"), orderBy("timestamp", "desc")), snap => {
+                window.globalLogs = snap.docs.map(d => d.data());
+                if(window.currentTab === 'admin') window.renderAdminLogs();
+            });
+        } catch (e) {
+            console.error("Firebase Snapshot Error:", e);
+        }
+
+        // First paint statically
+        window.updateTopHeader();
+        window.renderShopUI();
+        window.renderClansUI();
+
+    </script>
+</body>
+</html>
